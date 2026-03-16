@@ -1,14 +1,16 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>7-Day Fluency Program</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -34,51 +36,77 @@
             text-align: center;
         }
 
-        .header h1 {
-            font-size: 1.8em;
-            margin-bottom: 5px;
-        }
+        .header h1 { font-size: 1.8em; margin-bottom: 5px; }
+        .header p { font-size: 0.95em; opacity: 0.9; }
 
-        .header p {
-            font-size: 0.95em;
-            opacity: 0.9;
-        }
+        .content { padding: 20px; }
 
-        .content {
-            padding: 20px;
-        }
-
-        .day-selector {
+        /* Tab Nav */
+        .tab-nav {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
             margin-bottom: 20px;
         }
-
-        .day-btn {
-            padding: 12px 0;
+        .tab-nav-btn {
+            padding: 10px 4px;
             background: white;
             border: 2px solid #667eea;
             color: #667eea;
             border-radius: 12px;
             cursor: pointer;
-            font-size: 0.85em;
+            font-size: 0.72em;
             font-weight: 600;
             transition: all 0.3s;
             text-align: center;
+            line-height: 1.4;
+            touch-action: manipulation;
         }
+        .tab-nav-btn.active { background: #667eea; color: white; }
+        .tab-page { display: none; }
+        .tab-page.active { display: block; }
 
-        .day-btn.active {
-            background: #667eea;
-            color: white;
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
         }
-
-        .day-btn.completed {
-            background: #28a745;
-            border-color: #28a745;
-            color: white;
+        .stat-card {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+        .stat-number { font-size: 2em; color: #667eea; font-weight: bold; }
+        .stat-label { color: #6c757d; margin-top: 8px; font-size: 0.9em; }
 
+        /* Day Selector */
+        .day-selector {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        .day-btn {
+            padding: 10px 0;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.78em;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+            touch-action: manipulation;
+        }
+        .day-btn.active { background: #667eea; color: white; }
+        .day-btn.completed { background: #28a745; border-color: #28a745; color: white; }
+
+        /* Cards */
         .card {
             background: #f8f9fa;
             padding: 20px;
@@ -86,13 +114,9 @@
             margin-bottom: 15px;
             border-left: 5px solid #667eea;
         }
+        .card h3 { color: #667eea; margin-bottom: 12px; font-size: 1.3em; }
 
-        .card h3 {
-            color: #667eea;
-            margin-bottom: 12px;
-            font-size: 1.3em;
-        }
-
+        /* Buttons */
         .btn {
             padding: 14px 24px;
             background: #667eea;
@@ -106,23 +130,16 @@
             margin: 5px 5px 5px 0;
             width: 100%;
             display: block;
+            touch-action: manipulation;
+            font-family: inherit;
         }
+        .btn:active { transform: scale(0.95); }
+        .btn-small { padding: 10px 16px; font-size: 0.85em; width: auto; display: inline-block; }
+        .btn-secondary { background: #6c757d; }
+        .btn-danger { background: #dc3545; }
+        .btn-success { background: #28a745; }
 
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-small {
-            padding: 10px 20px;
-            font-size: 0.9em;
-            width: auto;
-            display: inline-block;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-        }
-
+        /* Practice Text */
         .practice-text {
             background: white;
             padding: 18px;
@@ -133,37 +150,8 @@
             border: 2px solid #dee2e6;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 18px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .stat-number {
-            font-size: 2em;
-            color: #667eea;
-            font-weight: bold;
-        }
-
-        .stat-label {
-            color: #6c757d;
-            margin-top: 8px;
-            font-size: 0.9em;
-        }
-
-        .exercise-list {
-            list-style: none;
-        }
-
+        /* Exercise List */
+        .exercise-list { list-style: none; }
         .exercise-item {
             background: white;
             padding: 15px;
@@ -174,41 +162,12 @@
             line-height: 1.6;
             cursor: pointer;
             transition: all 0.3s;
+            touch-action: manipulation;
         }
+        .exercise-item:active { transform: scale(0.98); }
+        .exercise-item.done { opacity: 0.6; text-decoration: line-through; background: #e8f5e9; }
 
-        .exercise-item:active {
-            transform: scale(0.98);
-        }
-
-        .exercise-item.done {
-            opacity: 0.6;
-            text-decoration: line-through;
-            background: #e8f5e9;
-        }
-
-        .timer {
-            font-size: 2.5em;
-            text-align: center;
-            color: #667eea;
-            font-weight: bold;
-            margin: 20px 0;
-            font-family: 'Courier New', monospace;
-        }
-
-        .breathing-circle {
-            width: 150px;
-            height: 150px;
-            border: 5px solid #667eea;
-            border-radius: 50%;
-            margin: 20px auto;
-            transition: all 4s ease-in-out;
-        }
-
-        .breathing-circle.inhale {
-            transform: scale(1.4);
-            border-color: #764ba2;
-        }
-
+        /* Progress */
         .progress-bar {
             width: 100%;
             height: 30px;
@@ -217,7 +176,6 @@
             overflow: hidden;
             margin: 15px 0;
         }
-
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
@@ -229,42 +187,9 @@
             font-weight: bold;
         }
 
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none; }
 
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.5em;
-            }
-            
-            .day-selector {
-                gap: 5px;
-            }
-            
-            .day-btn {
-                padding: 10px 0;
-                font-size: 0.75em;
-            }
-
-            .content {
-                padding: 15px;
-            }
-
-            .card {
-                padding: 15px;
-            }
-
-            .stat-number {
-                font-size: 1.6em;
-            }
-
-            .btn-small {
-                font-size: 0.8em;
-                padding: 8px 12px;
-            }
-        }
-
+        /* Quick Practice */
         .quick-practice-box {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
@@ -273,12 +198,9 @@
             margin-bottom: 20px;
             text-align: center;
         }
+        .quick-practice-box h3 { margin-bottom: 15px; color: white; }
 
-        .quick-practice-box h3 {
-            margin-bottom: 15px;
-            color: white;
-        }
-
+        /* Metronome */
         .metronome-display {
             width: 80px;
             height: 80px;
@@ -287,70 +209,223 @@
             margin: 15px auto;
             transition: all 0.1s;
         }
+        .metronome-display.beat { transform: scale(1.2); background: #764ba2; }
 
-        .metronome-display.beat {
-            transform: scale(1.2);
-            background: #764ba2;
+        /* Breathing */
+        .breathing-circle {
+            width: 150px;
+            height: 150px;
+            border: 5px solid #667eea;
+            border-radius: 50%;
+            margin: 20px auto;
+            transition: all 4s ease-in-out;
+        }
+        .breathing-circle.inhale { transform: scale(1.4); border-color: #764ba2; }
+
+        /* Timer */
+        .timer {
+            font-size: 2.5em;
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
         }
 
+        /* Slider */
         .slider {
             width: 100%;
             height: 8px;
             border-radius: 5px;
             outline: none;
             -webkit-appearance: none;
+            appearance: none;
             background: #dee2e6;
             margin: 15px 0;
         }
-
         .slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 25px;
-            height: 25px;
+            width: 28px; height: 28px;
             border-radius: 50%;
             background: #667eea;
             cursor: pointer;
         }
-
         .slider::-moz-range-thumb {
-            width: 25px;
-            height: 25px;
+            width: 28px; height: 28px;
             border-radius: 50%;
             background: #667eea;
             cursor: pointer;
             border: none;
         }
+
+        /* Waveform */
+        .waveform-box {
+            background: #1a1a2e;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 12px 0;
+            height: 80px;
+            overflow: hidden;
+        }
+        canvas#waveCanvas { width: 100%; height: 100%; display: block; }
+        .rec-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .rec-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85em; color: #dc3545; font-weight: 600; }
+        .rec-dot { width: 9px; height: 9px; border-radius: 50%; background: #dc3545; animation: blink 1s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+        audio#audioPlayback { width: 100%; margin-top: 10px; border-radius: 8px; }
+
+        /* Techniques */
+        .technique-card { background: white; border-radius: 10px; margin: 10px 0; overflow: hidden; border-left: 4px solid #667eea; }
+        .technique-header { padding: 14px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; touch-action: manipulation; }
+        .technique-header:active { background: #f0eeff; }
+        .technique-badge { font-size: 0.72em; padding: 3px 8px; border-radius: 20px; font-weight: 600; flex-shrink: 0; margin-left: 8px; }
+        .badge-core { background: #e8f5e9; color: #28a745; }
+        .badge-advanced { background: #fff3e0; color: #f57c00; }
+        .badge-mindset { background: #e3f2fd; color: #1976d2; }
+        .technique-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; padding: 0 16px; background: #f8f9fa; }
+        .technique-body.open { max-height: 500px; padding: 0 16px 16px; }
+        .technique-step { display: flex; gap: 10px; margin: 10px 0; align-items: flex-start; }
+        .step-num { width: 22px; height: 22px; border-radius: 50%; background: #667eea; color: white; font-size: 0.72em; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+        .step-text { font-size: 0.88em; color: #555; line-height: 1.6; }
+
+        /* Fear Ladder */
+        .fear-rung { background: white; border-radius: 10px; padding: 12px; margin: 8px 0; border-left: 4px solid #667eea; display: flex; align-items: flex-start; gap: 10px; }
+        .fear-level-badge { width: 32px; height: 32px; border-radius: 8px; background: #667eea; color: white; font-size: 0.75em; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .fear-input { width: 100%; margin-top: 5px; padding: 6px 10px; border: 1px dashed #dee2e6; border-radius: 6px; font-size: 0.82em; font-family: inherit; color: #333; background: #fafafa; }
+        .fear-input:focus { outline: none; border-color: #667eea; background: white; }
+
+        /* AI Plan */
+        .ai-form label { display: block; font-size: 0.85em; font-weight: 600; color: #555; margin: 12px 0 5px; }
+        .ai-form select, .ai-form textarea {
+            width: 100%; padding: 10px 12px; border: 2px solid #dee2e6; border-radius: 10px;
+            font-family: inherit; font-size: 0.9em; color: #333; background: white;
+            transition: border 0.2s; -webkit-appearance: none;
+        }
+        .ai-form select:focus, .ai-form textarea:focus { outline: none; border-color: #667eea; }
+        .ai-form textarea { resize: vertical; }
+        .ai-output-box {
+            background: #f0eeff; border: 2px solid #667eea; border-radius: 10px;
+            padding: 16px; margin-top: 15px; white-space: pre-wrap;
+            font-size: 0.88em; line-height: 1.8; color: #333; min-height: 50px;
+        }
+        .ai-loading { display: flex; align-items: center; gap: 10px; color: #667eea; font-size: 0.9em; font-weight: 600; }
+        .spinner { width: 20px; height: 20px; border: 3px solid #e0d8ff; border-top-color: #667eea; border-radius: 50%; animation: spin 0.7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Fluency Chart */
+        .fluency-chart { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; margin: 15px 0; align-items: flex-end; }
+        .chart-col { text-align: center; }
+        .chart-bar-wrap { height: 70px; display: flex; align-items: flex-end; justify-content: center; }
+        .chart-bar { width: 100%; max-width: 30px; border-radius: 4px 4px 0 0; background: #e0d8ff; transition: height 0.4s ease; cursor: pointer; min-height: 4px; }
+        .chart-bar.filled { background: #667eea; }
+        .chart-label { font-size: 0.68em; color: #888; margin-top: 3px; }
+
+        /* Rating */
+        .rating-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; margin: 10px 0; }
+        .rating-btn {
+            padding: 10px 4px; background: white; border: 2px solid #dee2e6;
+            border-radius: 10px; font-size: 0.85em; font-weight: 600; cursor: pointer;
+            text-align: center; color: #555; transition: all 0.2s; font-family: inherit; touch-action: manipulation;
+        }
+        .rating-btn.selected { background: #667eea; border-color: #667eea; color: white; }
+
+        /* Word cats */
+        .word-cat-row { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 12px; }
+        .word-cat-btn {
+            padding: 10px; background: white; border: 2px solid #dee2e6; border-radius: 10px;
+            font-size: 0.82em; font-weight: 600; cursor: pointer; color: #555;
+            font-family: inherit; transition: all 0.2s; touch-action: manipulation;
+        }
+        .word-cat-btn.active { background: #667eea; border-color: #667eea; color: white; }
+
+        /* Scenario tabs */
+        .scenario-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+        .scenario-tab {
+            padding: 8px 14px; background: white; border: 2px solid #dee2e6; border-radius: 20px;
+            font-size: 0.82em; font-weight: 600; cursor: pointer; color: #555;
+            font-family: inherit; transition: all 0.2s; touch-action: manipulation;
+        }
+        .scenario-tab.active { background: #667eea; border-color: #667eea; color: white; }
+        .scenario-line { padding: 8px 10px; border-radius: 8px; margin: 3px 0; cursor: pointer; border-left: 3px solid transparent; font-size: 0.92em; line-height: 1.6; transition: all 0.15s; touch-action: manipulation; }
+        .scenario-line:active { background: #f0eeff; border-left-color: #667eea; }
+
+        /* Tip box */
+        .tip-box { background: #e3f2fd; padding: 12px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 0.88em; line-height: 1.5; color: #1565c0; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #333; color: white; padding: 12px 24px; border-radius: 25px;
+            font-size: 0.9em; font-weight: 500; z-index: 9999; opacity: 0;
+            transition: all 0.3s; pointer-events: none; white-space: nowrap;
+            max-width: 90vw; text-align: center;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* Sync indicator */
+        .sync-dot {
+            display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+            background: #ccc; margin-left: 8px; vertical-align: middle;
+            transition: background 0.3s;
+        }
+        .sync-dot.syncing { background: #f57c00; animation: blink 0.8s infinite; }
+        .sync-dot.synced { background: #28a745; }
+        .sync-dot.error { background: #dc3545; }
+
+        @media (max-width: 480px) {
+            body { padding: 6px; }
+            .header h1 { font-size: 1.4em; }
+            .day-selector { gap: 4px; }
+            .day-btn { padding: 10px 0; font-size: 0.75em; }
+            .content { padding: 15px; }
+            .card { padding: 15px; }
+            .stat-number { font-size: 1.6em; }
+            .btn-small { font-size: 0.8em; padding: 8px 12px; }
+            .tab-nav-btn { font-size: 0.65em; padding: 9px 3px; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🗣️ 7-Day Fluency Program</h1>
-            <p>Simple, Effective Stuttering Therapy</p>
+<div class="container">
+    <div class="header">
+        <h1>🗣️ 7-Day Fluency Program</h1>
+        <p>Simple, Effective Stuttering Therapy <span class="sync-dot" id="syncDot" title="Supabase sync status"></span></p>
+    </div>
+
+    <div class="content">
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="currentDay">1</div>
+                <div class="stat-label">Current Day</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedDays">0/7</div>
+                <div class="stat-label">Days Done</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayTasks">0/3</div>
+                <div class="stat-label">Today's Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="streak">0</div>
+                <div class="stat-label">Day Streak</div>
+            </div>
         </div>
 
-        <div class="content">
-            <!-- Stats Section -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="currentDay">1</div>
-                    <div class="stat-label">Current Day</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="completedDays">0/7</div>
-                    <div class="stat-label">Days Done</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="todayTasks">0/3</div>
-                    <div class="stat-label">Today's Tasks</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="streak">0</div>
-                    <div class="stat-label">Day Streak</div>
-                </div>
-            </div>
+        <!-- Tab Nav -->
+        <div class="tab-nav">
+            <button class="tab-nav-btn active" onclick="showTab('home')">🏠<br>Home</button>
+            <button class="tab-nav-btn" onclick="showTab('techniques')">🧠<br>Techniques</button>
+            <button class="tab-nav-btn" onclick="showTab('record')">🎙️<br>Record</button>
+            <button class="tab-nav-btn" onclick="showTab('aiplan')">✨<br>AI Plan</button>
+        </div>
 
-            <!-- Day Selector -->
+        <!-- ══ HOME TAB ══ -->
+        <div class="tab-page active" id="tab-home">
+
             <div class="day-selector">
                 <button class="day-btn active" onclick="switchDay(1)">Day 1</button>
                 <button class="day-btn" onclick="switchDay(2)">Day 2</button>
@@ -361,56 +436,45 @@
                 <button class="day-btn" onclick="switchDay(7)">Day 7</button>
             </div>
 
-            <!-- Quick Practice Box -->
             <div class="quick-practice-box">
                 <h3>⚡ Quick Practice (5 min)</h3>
-                <div id="quickExercise" class="practice-text" style="background: rgba(255,255,255,0.9); color: #333;">
+                <div id="quickExercise" class="practice-text" style="background:rgba(255,255,255,0.9);color:#333;">
                     Click "Start Practice" to begin today's quick exercises
                 </div>
-                <button class="btn" id="quickPracticeBtn" onclick="startQuickPractice()" style="background: white; color: #f5576c; margin-top: 10px;">
+                <button class="btn" id="quickPracticeBtn" onclick="startQuickPractice()" style="background:white;color:#f5576c;margin-top:10px;">
                     Start Practice
                 </button>
             </div>
 
-            <!-- Daily Plan -->
             <div class="card">
                 <h3 id="dayTitle">Day 1: Breathing Foundation</h3>
                 <div id="dayDescription"></div>
             </div>
 
-            <!-- Exercises for Current Day -->
             <div class="card">
                 <h3>Today's Exercises</h3>
                 <ul class="exercise-list" id="exerciseList"></ul>
             </div>
 
-            <!-- Practice Tools -->
             <div class="card">
                 <h3>Practice Tools</h3>
-                
-                <!-- Breathing Exercise -->
+
+                <!-- Breathing -->
                 <div id="breathingTool" class="hidden">
-                    <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em;">
-                        <strong>💡 Tip:</strong> Belly should rise, not chest. Breathe through nose. Slow and steady wins!
-                    </div>
+                    <div class="tip-box">💡 <strong>Tip:</strong> Belly should rise, not chest. Breathe through nose. 4s in, 2s hold, 6s out.</div>
                     <div class="breathing-circle" id="breathingCircle"></div>
-                    <h2 style="text-align: center; color: #667eea; margin: 15px 0;" id="breathingText">
-                        Ready to breathe
-                    </h2>
+                    <h2 style="text-align:center;color:#667eea;margin:15px 0;" id="breathingText">Ready to breathe</h2>
                     <button class="btn" id="breathingBtn" onclick="startBreathing()">Start Breathing</button>
                 </div>
 
-                <!-- Reading Practice -->
+                <!-- Reading -->
                 <div id="readingTool" class="hidden">
-                    <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em;">
-                        <strong>💡 Tip:</strong> Read slowly. Use gentle starts. Pause at commas. Focus on technique, not speed!
-                    </div>
-                    <div class="practice-text" id="readingContent" style="max-height: 200px; overflow-y: auto;">
-                        Click "New Text" to get practice material
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+                    <div class="tip-box">💡 <strong>Tip:</strong> Read slowly. Use gentle starts. Pause at commas. Focus on technique, not speed!</div>
+                    <div class="practice-text" id="readingContent" style="max-height:200px;overflow-y:auto;">Click a difficulty button to get practice text</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0;">
                         <button class="btn btn-small" onclick="generateReading('easy')">Easy</button>
                         <button class="btn btn-small" onclick="generateReading('medium')">Medium</button>
+                        <button class="btn btn-small" onclick="generateReading('hard')">Hard</button>
                     </div>
                     <div class="timer" id="timer">00:00</div>
                     <button class="btn" id="timerBtn" onclick="toggleTimer()">Start Timer</button>
@@ -418,58 +482,45 @@
 
                 <!-- Metronome -->
                 <div id="metronomeTool" class="hidden">
-                    <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em;">
-                        <strong>💡 Tip:</strong> One syllable per beat. "My-name-is-John". Start slow (60 BPM), speed up later!
-                    </div>
+                    <div class="tip-box">💡 <strong>Tip:</strong> One syllable per beat. "My-name-is-John". Start slow (60 BPM), speed up later!</div>
                     <div class="metronome-display" id="metronomeDisplay"></div>
-                    <h2 style="text-align: center; color: #667eea;" id="bpmDisplay">60 BPM</h2>
-                    <input type="range" min="40" max="100" value="60" class="slider" oninput="updateBPM(this.value)">
+                    <h2 style="text-align:center;color:#667eea;" id="bpmDisplay">60 BPM</h2>
+                    <input type="range" min="40" max="120" value="60" class="slider" oninput="updateBPM(this.value)">
+                    <div style="display:flex;justify-content:space-between;font-size:.78em;color:#888;margin-top:-8px;">
+                        <span>40 BPM</span><span>120 BPM</span>
+                    </div>
                     <button class="btn" id="metronomeBtn" onclick="toggleMetronome()">Start Metronome</button>
                 </div>
 
-                <!-- Word Practice -->
+                <!-- Words -->
                 <div id="wordTool" class="hidden">
-                    <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em;">
-                        <strong>💡 Tip:</strong> Start word gently. Stretch first sound. Light lip/tongue contact. Relax!
+                    <div class="tip-box">💡 <strong>Tip:</strong> Start word gently. Stretch first sound. Light lip/tongue contact. Relax!</div>
+                    <div class="word-cat-row">
+                        <button class="word-cat-btn active" onclick="wordCat('vowel',this)">Vowel Starts</button>
+                        <button class="word-cat-btn" onclick="wordCat('hard',this)">Stop Sounds</button>
+                        <button class="word-cat-btn" onclick="wordCat('feared',this)">Feared Words</button>
+                        <button class="word-cat-btn" onclick="wordCat('name',this)">Names</button>
                     </div>
-                    <div class="practice-text" id="wordPractice" style="font-size: 1.3em; text-align: center; padding: 30px;">
-                        Click button below to practice
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
-                        <button class="btn btn-small" onclick="generateWord('vowel')">Vowel Start</button>
-                        <button class="btn btn-small" onclick="generateWord('hard')">Hard Sounds</button>
-                    </div>
-                    <button class="btn" onclick="generateWord('random')">New Word</button>
+                    <div class="practice-text" id="wordPractice" style="font-size:1.3em;text-align:center;padding:30px;">Select a category above</div>
+                    <button class="btn" onclick="generateWord()">New Word</button>
                 </div>
 
-                <!-- Phrase Practice -->
+                <!-- Phrases -->
                 <div id="phraseTool" class="hidden">
-                    <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em;">
-                        <strong>💡 Tip:</strong> Pause between phrases. Use easy onset. Breathe before speaking!
-                    </div>
-                    <div class="practice-text" id="phrasePractice" style="font-size: 1.1em; line-height: 2;">
-                        Click button to get practice phrases
-                    </div>
+                    <div class="tip-box">💡 <strong>Tip:</strong> Pause between phrases. Use easy onset. Breathe before speaking!</div>
+                    <div class="practice-text" id="phrasePractice" style="font-size:1.1em;line-height:2;">Click button to get practice phrases</div>
+                    <div style="font-size:.82em;color:#888;text-align:center;margin-bottom:10px;">Say it 3×: Very slow → Normal → Natural</div>
                     <button class="btn" onclick="generatePhrase()">New Phrase</button>
                 </div>
 
-                <!-- Conversation Scenarios -->
+                <!-- Scenarios -->
                 <div id="scenarioTool" class="hidden">
-                    <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em;">
-                        <strong>💡 Tip:</strong> Practice out loud! Record yourself. Start slow, build confidence!
-                    </div>
-                    <div class="practice-text" id="scenarioPractice">
-                        Click scenario type below
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                        <button class="btn btn-small" onclick="generateScenario('intro')">Introduction</button>
-                        <button class="btn btn-small" onclick="generateScenario('phone')">Phone Call</button>
-                        <button class="btn btn-small" onclick="generateScenario('order')">Ordering</button>
-                        <button class="btn btn-small" onclick="generateScenario('question')">Questions</button>
-                    </div>
+                    <div class="tip-box">💡 <strong>Tip:</strong> Practice out loud! Tap a line to highlight it. Record yourself for review.</div>
+                    <div class="scenario-tabs" id="scenarioTabs"></div>
+                    <div class="practice-text" id="scenarioPractice" style="padding:14px;">Select a scenario above.</div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:15px;">
                     <button class="btn btn-small" onclick="showTool('breathing')">Breathing</button>
                     <button class="btn btn-small" onclick="showTool('reading')">Reading</button>
                     <button class="btn btn-small" onclick="showTool('metronome')">Metronome</button>
@@ -477,606 +528,1029 @@
                     <button class="btn btn-small" onclick="showTool('phrase')">Phrases</button>
                     <button class="btn btn-small" onclick="showTool('scenario')">Scenarios</button>
                 </div>
-                <button class="btn btn-secondary" onclick="markDayComplete()" style="margin-top: 10px;">✓ Complete Day</button>
+                <button class="btn btn-secondary" onclick="markDayComplete()" style="margin-top:10px;">✓ Complete Day</button>
             </div>
 
-            <!-- Progress -->
             <div class="card">
                 <h3>Your Progress</h3>
                 <div class="progress-bar">
-                    <div class="progress-fill" id="progressBar" style="width: 0%;">0%</div>
+                    <div class="progress-fill" id="progressBar" style="width:0%;">0%</div>
                 </div>
-                <p style="text-align: center; margin-top: 10px; color: #6c757d;" id="progressText">
-                    Start your journey to fluent speech!
-                </p>
+                <p style="text-align:center;margin-top:10px;color:#6c757d;" id="progressText">Start your journey to fluent speech!</p>
             </div>
+
+        </div><!-- /tab-home -->
+
+        <!-- ══ TECHNIQUES TAB ══ -->
+        <div class="tab-page" id="tab-techniques">
+
+            <div class="card">
+                <h3>🧠 Therapy Techniques</h3>
+                <p style="font-size:.88em;color:#666;margin-bottom:15px;">Tap any technique to expand its step-by-step guide.</p>
+                <div id="techniqueList"></div>
+            </div>
+
+            <div class="card">
+                <h3>🪜 Feared Words Hierarchy</h3>
+                <p style="font-size:.88em;color:#666;margin-bottom:14px;">Build your personal anxiety ladder. Practice easiest words first, then climb.</p>
+                <div id="fearLadder"></div>
+                <button class="btn btn-success" onclick="saveFearWords()" style="margin-top:12px;">💾 Save My Words</button>
+            </div>
+
         </div>
-    </div>
 
-    <script>
-        // 7-Day Program Data
-        const program = {
-            1: {
-                title: "Day 1: Breathing Foundation",
-                description: "Learn diaphragmatic breathing - the foundation of fluent speech",
-                exercises: [
-                    "Practice diaphragmatic breathing 3 times (5 min each)",
-                    "Read aloud for 5 minutes using slow, gentle breathing",
-                    "Practice saying your name 10 times with easy onset"
-                ],
-                quickPractice: [
-                    "Take 5 deep belly breaths - hand on stomach",
-                    "Say 'aaaah' gently for 5 seconds (repeat 3x)",
-                    "Count 1-10 slowly with one breath per number",
-                    "Say your name 3 times with soft start",
-                    "Read one sentence very slowly out loud"
-                ]
-            },
-            2: {
-                title: "Day 2: Easy Onset",
-                description: "Start words gently, avoid hard attacks",
-                exercises: [
-                    "Practice easy onset with vowel words: Apple, Ocean, Under (10 min)",
-                    "Say simple sentences with gentle starts (10 min)",
-                    "Read aloud focusing on soft word beginnings (10 min)"
-                ],
-                quickPractice: [
-                    "Deep breath in... slow breath out (3x)",
-                    "Say 'Easy... Ocean... Apple' gently",
-                    "Practice 'I am calm' 5 times slowly",
-                    "Hum 'mmmm' for 5 seconds (3x)",
-                    "Say 5 words starting with vowels softly"
-                ]
-            },
-            3: {
-                title: "Day 3: Paced Speech",
-                description: "Control your speaking rate with rhythm",
-                exercises: [
-                    "Use metronome at 60 BPM - one syllable per beat (15 min)",
-                    "Practice paced sentences without metronome (10 min)",
-                    "Read aloud at controlled pace (10 min)"
-                ],
-                quickPractice: [
-                    "Breathe deeply 3 times",
-                    "Tap desk and say 'My-name-is' with beats",
-                    "Count 1-10, one number per second",
-                    "Say a sentence very slowly (5x)",
-                    "Practice slow, rhythmic breathing"
-                ]
-            },
-            4: {
-                title: "Day 4: Light Contact",
-                description: "Reduce tension in lips and tongue",
-                exercises: [
-                    "Practice P, B, T, K sounds with light touch (10 min)",
-                    "Say words gently: Paper, Baby, Today, Coffee (10 min)",
-                    "Conversation practice with family using light contact (15 min)"
-                ],
-                quickPractice: [
-                    "Relax jaw - let it hang loose",
-                    "Touch lips lightly for 'P' sound - Pop, People",
-                    "Light tongue tap for 'T' - Today, Time",
-                    "Say 'Baby, Coffee, Paper' gently (5x)",
-                    "Practice one full sentence with light contact"
-                ]
-            },
-            5: {
-                title: "Day 5: Reading Practice",
-                description: "Apply all techniques while reading",
-                exercises: [
-                    "Read easy text aloud slowly (15 min)",
-                    "Read medium difficulty text (15 min)",
-                    "Practice reading to someone (15 min)"
-                ],
-                quickPractice: [
-                    "Deep breathing (3x)",
-                    "Read one paragraph very slowly",
-                    "Re-read same paragraph focusing on technique",
-                    "Read out loud with gentle starts",
-                    "Practice difficult words 3x each"
-                ]
-            },
-            6: {
-                title: "Day 6: Real Conversations",
-                description: "Practice in real-life situations",
-                exercises: [
-                    "Make one phone call (order food, ask question)",
-                    "Have 10-minute conversation with family",
-                    "Practice introducing yourself 10 times"
-                ],
-                quickPractice: [
-                    "Prepare: breathe deeply 3 times",
-                    "Practice: 'Hi, my name is...' (5x)",
-                    "Practice: 'How are you?' (5x)",
-                    "Practice ordering: 'I'd like...' (5x)",
-                    "Review: Did I use gentle starts?"
-                ]
-            },
-            7: {
-                title: "Day 7: Integration & Review",
-                description: "Combine all techniques naturally",
-                exercises: [
-                    "Review all techniques (20 min)",
-                    "Practice challenging situations (20 min)",
-                    "Set goals for continued practice"
-                ],
-                quickPractice: [
-                    "Deep breathing with awareness",
-                    "Practice gentle onsets on 5 words",
-                    "Use paced speech for one sentence",
-                    "Read aloud with all techniques",
-                    "Reflect: What helped most?"
-                ]
-            }
-        };
+        <!-- ══ RECORD TAB ══ -->
+        <div class="tab-page" id="tab-record">
 
-        // State
-        let currentDay = 1;
-        let completedDays = [];
-        let todayTasksDone = 0;
-        let quickPracticeIndex = 0;
-        let quickPracticeRunning = false;
-        let breathingActive = false;
-        let timerActive = false;
-        let timerSeconds = 0;
-        let timerInterval = null;
-        let metronomeActive = false;
-        let metronomeInterval = null;
-        let currentBPM = 60;
-        let audioContext = null;
+            <div class="card">
+                <h3>🎙️ Voice Recorder</h3>
+                <div class="tip-box">💡 Record yourself doing any exercise. Listen back to notice improvements in fluency, onset, and pacing.</div>
+                <div class="waveform-box">
+                    <canvas id="waveCanvas"></canvas>
+                </div>
+                <div class="rec-row">
+                    <button class="btn btn-small btn-danger" id="recBtn" onclick="toggleRecording()" style="width:auto;">⏺ Record</button>
+                    <button class="btn btn-small" id="playBtn" onclick="playbackAudio()" disabled style="width:auto;">▶ Play Back</button>
+                    <button class="btn btn-small btn-secondary" onclick="clearRecording()" style="width:auto;">🗑 Clear</button>
+                    <div class="rec-indicator hidden" id="recIndicator">
+                        <div class="rec-dot"></div> Recording…
+                    </div>
+                </div>
+                <audio id="audioPlayback" controls style="display:none;width:100%;margin-top:12px;"></audio>
+            </div>
 
-        // Practice Content Data
-        const readingTexts = {
-            easy: [
-                "The sun is warm. Birds sing songs. I feel calm today. My voice is strong.",
-                "I can speak well. Words flow easily. Practice helps me. I am confident.",
-                "Take deep breaths. Start words gently. Speak at my pace. I am in control.",
-                "Morning brings hope. Each day gets better. I trust my voice. Progress is real.",
-                "Soft starts work. Light touch matters. Slow is smooth. Smooth is fast."
-            ],
-            medium: [
-                "Communication is a skill anyone can improve. With daily practice and the right techniques, fluent speech becomes natural. Every small step forward builds confidence and reduces fear.",
-                "Breathing from the diaphragm provides the foundation for smooth speech. When you breathe properly, words flow more easily. This simple technique can transform your speaking ability.",
-                "Starting words gently, without force or tension, allows sounds to emerge naturally. Easy onset reduces blocks and creates fluent speech patterns. Practice this daily for best results.",
-                "Reading aloud strengthens speech skills safely. You control the pace and focus on technique without conversation pressure. Ten minutes daily makes a real difference.",
-                "Real conversations become easier when techniques are automatic. Start with family, then friends, then strangers. Gradual exposure builds lasting confidence and fluency."
-            ]
-        };
+            <div class="card">
+                <h3>📊 Rate Today's Fluency</h3>
+                <p style="font-size:.88em;color:#666;margin-bottom:12px;">After listening back, rate your session (1–10) to track improvement.</p>
+                <div class="rating-row" id="ratingRow"></div>
+                <div id="ratingFeedback" style="font-size:.88em;color:#667eea;min-height:22px;margin-top:6px;font-weight:600;"></div>
+            </div>
 
-        const vowelWords = [
-            "Apple", "Ocean", "Under", "Eagle", "Island", 
-            "Orange", "Energy", "Animal", "Elephant", "Umbrella",
-            "Igloo", "Anchor", "Engine", "Uncle", "After"
-        ];
+            <div class="card">
+                <h3>📈 Fluency Chart</h3>
+                <p style="font-size:.82em;color:#888;margin-bottom:8px;">Your self-rated fluency across all 7 days. Tap a bar to update.</p>
+                <div class="fluency-chart" id="fluencyChart"></div>
+                <div style="display:flex;justify-content:space-between;font-size:.72em;color:#aaa;margin-top:4px;">
+                    <span>0 — no fluency</span><span>10 — perfect</span>
+                </div>
+            </div>
 
-        const hardSoundWords = [
-            "Paper", "People", "Perfect", "Baby", "Better",
-            "Today", "Tomorrow", "Kitchen", "Coffee", "Game",
-            "Garden", "Super", "Simple", "Father", "Mother"
-        ];
+            <div class="card">
+                <h3>✅ What To Listen For</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:5px;">
+                    <div style="background:#e8f5e9;border-radius:10px;padding:12px;font-size:.85em;">
+                        <strong style="color:#28a745;display:block;margin-bottom:5px;">Good signs ✓</strong>
+                        Gentle word starts · Smooth transitions · Controlled pace · Natural pauses
+                    </div>
+                    <div style="background:#fff3e0;border-radius:10px;padding:12px;font-size:.85em;">
+                        <strong style="color:#f57c00;display:block;margin-bottom:5px;">Work on ⚠️</strong>
+                        Hard attacks · Rushed speech · Muscle tension · Word avoidance
+                    </div>
+                </div>
+            </div>
 
-        const phrases = [
-            "My name is _____ and I feel confident",
-            "I can speak clearly and calmly",
-            "Words flow easily when I relax",
-            "I am proud of my progress",
-            "Each day brings improvement",
-            "I control my speech, not fear",
-            "Gentle starts lead to smooth speech",
-            "My voice matters and deserves to be heard",
-            "Practice makes fluency natural",
-            "I trust my techniques and abilities"
-        ];
+        </div>
 
-        const scenarios = {
-            intro: `<strong>Self Introduction Practice:</strong><br><br>
-                "Hi, my name is [your name]"<br>
-                "I work as a [your job]"<br>
-                "Nice to meet you"<br>
-                "How are you doing today?"<br>
-                "I'm from [your city]"<br><br>
-                <em>Say each line 3 times slowly</em>`,
-            phone: `<strong>Phone Call Practice:</strong><br><br>
-                "Hello, I'd like to order..."<br>
-                "Can I get [item] please?"<br>
-                "What time will that be ready?"<br>
-                "Thank you very much"<br>
-                "Have a great day"<br><br>
-                <em>Practice with gentle starts</em>`,
-            order: `<strong>Restaurant Ordering:</strong><br><br>
-                "Table for [number], please"<br>
-                "I'll have the [dish name]"<br>
-                "Could I get some water?"<br>
-                "This looks delicious"<br>
-                "The check, please"<br><br>
-                <em>Use paced speech</em>`,
-            question: `<strong>Common Questions:</strong><br><br>
-                "What time is it?"<br>
-                "Where is the bathroom?"<br>
-                "How much does this cost?"<br>
-                "Can you help me?"<br>
-                "Do you have [item]?"<br><br>
-                <em>Breathe before each question</em>`
-        };
+        <!-- ══ AI PLAN TAB ══ -->
+        <div class="tab-page" id="tab-aiplan">
 
-        // Generate Reading Content
-        function generateReading(level) {
-            const texts = readingTexts[level];
-            const random = texts[Math.floor(Math.random() * texts.length)];
-            document.getElementById('readingContent').textContent = random;
+            <div class="card">
+                <h3>✨ AI Personalised Plan</h3>
+                <p style="font-size:.88em;color:#666;margin-bottom:15px;">Describe your challenges and get a custom 7-day plan built just for you.</p>
+
+                <div class="ai-form">
+                    <label>Primary stuttering type</label>
+                    <select id="ai-type">
+                        <option value="blocks">Blocks — getting stuck, no sound comes out</option>
+                        <option value="repetitions">Repetitions — re-re-repeating sounds or words</option>
+                        <option value="prolongations">Prolongations — stretching sounds ("Ssssee you")</option>
+                        <option value="mixed">Mixed — blocks, repetitions, and prolongations</option>
+                    </select>
+
+                    <label>Hardest speaking situation</label>
+                    <select id="ai-trigger">
+                        <option value="phone">On the phone</option>
+                        <option value="authority">Speaking to authority figures</option>
+                        <option value="strangers">Meeting strangers</option>
+                        <option value="intro">Introducing myself</option>
+                        <option value="stress">When stressed or rushed</option>
+                        <option value="words">On specific words or sounds</option>
+                    </select>
+
+                    <label>Your experience level</label>
+                    <select id="ai-level">
+                        <option value="beginner">Beginner — just starting therapy</option>
+                        <option value="some">Some experience — know the basics</option>
+                        <option value="intermediate">Intermediate — practised for months</option>
+                        <option value="advanced">Advanced — working on naturalness</option>
+                    </select>
+
+                    <label>Any specific goals or context? (optional)</label>
+                    <textarea id="ai-context" rows="3" placeholder="e.g. 'I have a job interview next week' or 'I struggle most with my name and phone calls'"></textarea>
+                </div>
+
+                <button class="btn" onclick="generateAIPlan()" style="margin-top:15px;">✨ Generate My Plan</button>
+
+                <div id="ai-output-wrap" class="hidden">
+                    <div class="ai-output-box" id="ai-output"></div>
+                    <button class="btn btn-secondary" onclick="copyAIPlan()" style="margin-top:8px;">📋 Copy Plan</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div><!-- /content -->
+</div><!-- /container -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─────────────────────────
+   SUPABASE CONFIG
+   Only edit these two lines
+───────────────────────── */
+const SUPABASE_URL = 'https://mjhsmtzuyoihcnxblfvi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qaHNtdHp1eW9paGNueGJsZnZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTgzMjIsImV4cCI6MjA4OTIzNDMyMn0.iAxoTSYB6VT_QH_CqzbQdffouCZxKrKGMJuPdEmS5V8';
+
+/* ─────────────────────────
+   SUPABASE CLIENT
+───────────────────────── */
+const sb = {
+    headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+    },
+    userId() {
+        let id = localStorage.getItem('fp_user_id');
+        if (!id) {
+            id = 'user_' + Math.random().toString(36).slice(2) + Date.now();
+            localStorage.setItem('fp_user_id', id);
         }
+        return id;
+    },
+    async get() {
+        const res = await fetch(
+            `${SUPABASE_URL}/rest/v1/fluency_progress?user_id=eq.${this.userId()}&limit=1`,
+            { headers: this.headers }
+        );
+        const rows = await res.json();
+        return rows[0] || null;
+    },
+    async upsert(data) {
+        await fetch(`${SUPABASE_URL}/rest/v1/fluency_progress`, {
+            method: 'POST',
+            headers: { ...this.headers, 'Prefer': 'resolution=merge-duplicates' },
+            body: JSON.stringify({ user_id: this.userId(), ...data, updated_at: new Date().toISOString() })
+        });
+    }
+};
 
-        // Generate Word Practice
-        function generateWord(type) {
-            let word;
-            if (type === 'vowel') {
-                word = vowelWords[Math.floor(Math.random() * vowelWords.length)];
-            } else if (type === 'hard') {
-                word = hardSoundWords[Math.floor(Math.random() * hardSoundWords.length)];
-            } else {
-                const allWords = [...vowelWords, ...hardSoundWords];
-                word = allWords[Math.floor(Math.random() * allWords.length)];
-            }
-            document.getElementById('wordPractice').innerHTML = 
-                `<div style="font-size: 2em; font-weight: bold; color: #667eea; margin: 20px 0;">${word}</div>
-                <div style="font-size: 0.9em; color: #666;">Say it 5 times with gentle start</div>`;
+function setSyncDot(state) {
+    const dot = document.getElementById('syncDot');
+    dot.className = 'sync-dot ' + state;
+    dot.title = state === 'synced' ? 'Saved to cloud ✓' : state === 'syncing' ? 'Saving…' : 'Offline — saved locally';
+}
+
+/* ─────────────────────────
+   PROGRAM DATA
+───────────────────────── */
+const program = {
+    1: {
+        title: "Day 1: Breathing Foundation",
+        description: "Learn diaphragmatic breathing — the foundation of fluent speech.",
+        exercises: [
+            "Practice diaphragmatic breathing 3 times (5 min each)",
+            "Read aloud for 5 minutes using slow, gentle breathing",
+            "Practice saying your name 10 times with easy onset"
+        ],
+        quickPractice: [
+            "Take 5 deep belly breaths — hand on stomach",
+            "Say 'aaaah' gently for 5 seconds (repeat 3×)",
+            "Count 1–10 slowly with one breath per number",
+            "Say your name 3 times with a soft, gentle start",
+            "Read one sentence very slowly out loud"
+        ]
+    },
+    2: {
+        title: "Day 2: Easy Onset",
+        description: "Start words gently, avoid hard attacks on first sounds.",
+        exercises: [
+            "Practice easy onset with vowel words: Apple, Ocean, Under (10 min)",
+            "Say simple sentences with gentle starts (10 min)",
+            "Read aloud focusing on soft word beginnings (10 min)"
+        ],
+        quickPractice: [
+            "Deep breath in… slow breath out (×3)",
+            "Say 'Easy… Ocean… Apple' gently",
+            "Practice 'I am calm' 5 times slowly",
+            "Hum 'mmmm' for 5 seconds (×3)",
+            "Say 5 vowel-start words as softly as possible"
+        ]
+    },
+    3: {
+        title: "Day 3: Paced Speech",
+        description: "Control your speaking rate using rhythm and the metronome.",
+        exercises: [
+            "Use metronome at 60 BPM — one syllable per beat (15 min)",
+            "Practice paced sentences without metronome (10 min)",
+            "Read aloud at a controlled, steady pace (10 min)"
+        ],
+        quickPractice: [
+            "Breathe deeply ×3",
+            "Tap desk and say 'My-name-is' with beats",
+            "Count 1–10, one number per second",
+            "Say a sentence very slowly (×5)",
+            "Practice slow, rhythmic breathing for 30 seconds"
+        ]
+    },
+    4: {
+        title: "Day 4: Light Contact",
+        description: "Reduce tension in lips and tongue for smoother sounds.",
+        exercises: [
+            "Practice P, B, T, K sounds with light touch (10 min)",
+            "Say words gently: Paper, Baby, Today, Coffee (10 min)",
+            "Conversation practice with family using light contact (15 min)"
+        ],
+        quickPractice: [
+            "Relax jaw — let it hang completely loose",
+            "Touch lips lightly for 'P' sound: Pop, People",
+            "Light tongue tap for 'T': Today, Time",
+            "Say 'Baby, Coffee, Paper' gently (×5)",
+            "Practice one full sentence with light contact only"
+        ]
+    },
+    5: {
+        title: "Day 5: Reading Practice",
+        description: "Apply all techniques simultaneously while reading aloud.",
+        exercises: [
+            "Read easy text aloud slowly (15 min)",
+            "Read medium difficulty text (15 min)",
+            "Practice reading to someone else (15 min)"
+        ],
+        quickPractice: [
+            "Deep breathing ×3",
+            "Read one paragraph very slowly",
+            "Re-read same paragraph focusing on technique",
+            "Read another paragraph with gentle starts",
+            "Practice 3 difficult words from the text ×3 each"
+        ]
+    },
+    6: {
+        title: "Day 6: Real Conversations",
+        description: "Take your techniques into real-life speaking situations.",
+        exercises: [
+            "Make one phone call (order food, ask a question)",
+            "Have a 10-minute conversation with family",
+            "Practice introducing yourself 10 times"
+        ],
+        quickPractice: [
+            "Prepare: breathe deeply ×3",
+            "Practice 'Hi, my name is…' — 5× confidently",
+            "Practice 'How are you?' — 5× with easy onset",
+            "Practice ordering: 'I'd like…' (×5)",
+            "Review: Did I use gentle starts just now?"
+        ]
+    },
+    7: {
+        title: "Day 7: Integration & Review",
+        description: "Combine all techniques naturally — fluency should feel effortless.",
+        exercises: [
+            "Review all techniques in sequence (20 min)",
+            "Practice your most challenging situation (20 min)",
+            "Set 3 goals for the next 30 days of practice"
+        ],
+        quickPractice: [
+            "Deep breathing with full awareness",
+            "Easy onset on 5 personally difficult words",
+            "Paced speech on one challenging sentence",
+            "Read aloud applying all 4 techniques together",
+            "Reflect: What has helped me most this week?"
+        ]
+    }
+};
+
+const readingTexts = {
+    easy: [
+        "The sun is warm today.\nBirds sing in the trees.\nI feel calm and ready.\nMy voice is strong and clear.\nWords come easily when I breathe.",
+        "I can speak well.\nWords flow smoothly.\nPractice helps every day.\nI am confident in my voice.\nEach session makes me stronger.",
+        "Take a deep breath.\nStart each word gently.\nSpeak at your own pace.\nYou are in control.\nFluency comes with patience."
+    ],
+    medium: [
+        "Communication is a skill anyone can improve. With daily practice and the right techniques, fluent speech becomes natural. Every small step forward builds confidence and reduces fear.",
+        "Breathing from the diaphragm provides the foundation for smooth speech. When you breathe properly, words flow more easily. This simple technique can transform your speaking ability.",
+        "Starting words gently, without force or tension, allows sounds to emerge naturally. Easy onset reduces blocks and creates fluent speech patterns. Practice this daily for best results."
+    ],
+    hard: [
+        "Voluntary stuttering is a paradoxical but powerful technique used in stuttering therapy. By deliberately and calmly choosing to stutter, the speaker takes control and removes the element of fear. Over time, this desensitises the speaker to the sensation of stuttering.",
+        "The hierarchy of feared situations forms the backbone of systematic desensitisation. Beginning with least anxiety-provoking scenarios and gradually progressing, the speaker builds tolerance incrementally. Avoidance maintains fear — calm exposure dissolves it."
+    ]
+};
+
+const wordLists = {
+    vowel: ["Apple","Ocean","Under","Eagle","Island","Orange","Energy","Animal","Elephant","Umbrella","Igloo","Anchor","Engine","Uncle","After","Open","Every","Idea","Only"],
+    hard: ["Paper","People","Perfect","Baby","Better","Today","Tomorrow","Kitchen","Coffee","Game","Garden","Super","Simple","Father","Mother","Table","Door","Good","Car","Call"],
+    feared: [],
+    name: ["Your own first name","Your full name","Your street name","Your city name","Your workplace","A colleague's name","Your doctor's name","Your school name"]
+};
+
+const phrases = [
+    "My name is [your name] and I speak with confidence",
+    "I am grateful for every conversation I have",
+    "Words flow easily when I relax and breathe",
+    "I control my speech — fear does not control me",
+    "Each day I become a more fluent speaker",
+    "I deserve to be heard and I will be heard",
+    "Gentle starts lead to smooth, connected speech",
+    "My voice matters and I use it with courage",
+    "I accept myself fully — stutter and all",
+    "Progress is slow, steady, and absolutely real"
+];
+
+const scenarios = {
+    intro:    { label:"Intro",     lines:["Hi, my name is [your name].","I work as a [your job].","I'm from [your city].","It's really nice to meet you.","How are you doing today?"] },
+    phone:    { label:"Phone",     lines:["Hello, I'd like to make an appointment.","Could I speak to someone about [topic]?","My name is [name] — shall I spell that?","Could you repeat that, please?","Thank you very much. Goodbye."] },
+    order:    { label:"Ordering",  lines:["Table for [number], please.","I'll have the [dish] please.","Could I get some water?","Could I change my order, please?","Could I have the bill, please?"] },
+    question: { label:"Questions", lines:["Excuse me — could you help me?","What time does this close?","How do I get to [destination]?","How much does this cost?","Do you have this in [size]?"] },
+    work:     { label:"At Work",   lines:["I'd like to share an idea.","Could I ask for your feedback?","I'm sorry, could you clarify that?","I'll handle that by [time].","Thank you for the opportunity."] }
+};
+
+const TECHNIQUES = [
+    { name:"Easy Onset", icon:"🌊", badge:"Core", badgeClass:"badge-core",
+      desc:"Start every word gently — no hard attacks, no tension.",
+      steps:["Take a gentle breath before speaking","Begin the word with a flowing, soft sound — no force","For vowels: the sound emerges, you don't push it","For stops (P/B/T/K): use the lightest possible contact","Practise slowly — speed comes naturally with time"] },
+    { name:"Prolonged Speech", icon:"🎶", badge:"Core", badgeClass:"badge-core",
+      desc:"Stretch syllables slightly to reduce time pressure.",
+      steps:["Slow your overall rate to ~2/3 of normal speed","Stretch all vowel sounds slightly","Blend words together — no sharp breaks between them","Use smooth, flowing intonation","Gradually increase rate over days and weeks"] },
+    { name:"Voluntary Stuttering", icon:"🔄", badge:"Advanced", badgeClass:"badge-advanced",
+      desc:"Deliberately stutter to reduce fear and desensitise yourself.",
+      steps:["Choose a word you'd normally fear or avoid","Deliberately repeat the first sound: 'P-P-Paper'","Hold a prolongation voluntarily: 'Paaaper'","Stay calm — you chose to do it, so it feels different","Start in low-stakes situations first","Gradually use in progressively harder situations"] },
+    { name:"Cancellation", icon:"⏸️", badge:"Advanced", badgeClass:"badge-advanced",
+      desc:"After a block, pause, reset, then say the word again with technique.",
+      steps:["You stutter on a word — let it happen, don't fight it","Pause completely for 1–2 seconds after the stutter","Breathe and mentally prepare your gentle onset","Say the word again calmly with easy onset","Never rush or apologise — own the pause","This becomes an automatic reset reflex over time"] },
+    { name:"Pull-Out", icon:"🔓", badge:"Advanced", badgeClass:"badge-advanced",
+      desc:"While in a stutter, gently modify your speech to slide out of it.",
+      steps:["Feel a stutter beginning — don't stop or back away","Continue the sound but deliberately slow it down","Ease tension from lips, tongue, and throat","Stretch and soften the sound as you complete it","Finish the word — never avoid or substitute it","This is an in-the-moment rescue technique"] },
+    { name:"Desensitisation", icon:"🪜", badge:"Mindset", badgeClass:"badge-mindset",
+      desc:"Reduce emotional reaction through systematic exposure.",
+      steps:["List situations from least to most feared (use the Fear Ladder)","Start practising in the easiest scenario first","Repeat until anxiety is low, then move one rung up","Openly acknowledge your stutter to trusted others","Seek speaking opportunities rather than avoiding them","Celebrate every exposure attempt, not just fluent speech"] },
+    { name:"Acceptance & Openness", icon:"💚", badge:"Mindset", badgeClass:"badge-mindset",
+      desc:"Paradoxically, accepting stuttering reduces its power over you.",
+      steps:["Tell someone close that you stutter — remove the secret","When asked to repeat, do so calmly without apology","Stop avoiding words — say the word you intended","Separate your worth as a person from your fluency","Remember: many highly successful people stutter","Self-compassion is a clinical tool, not a weakness"] }
+];
+
+const FEAR_LEVELS = [
+    { level:"L1", label:"Easiest — Low anxiety",          desc:"Words you stutter on sometimes but don't avoid" },
+    { level:"L2", label:"Mild — Slightly uncomfortable",  desc:"Words you occasionally swap for easier ones" },
+    { level:"L3", label:"Moderate — Regularly avoid",     desc:"Words that reliably trigger blocks" },
+    { level:"L4", label:"Hard — Significant anxiety",     desc:"Situations you prepare for with dread" },
+    { level:"L5", label:"Hardest — Feared most",          desc:"The word or situation you fear above all" }
+];
+
+const RATING_MSGS = ["","Keep going — every session counts!","You are making real progress.","Good effort today!","Nice work!","Strong session!","Technique is clearly improving.","Great fluency today!","Excellent — nearly perfect!","Outstanding session!","Perfect! 🌟"];
+
+/* ─────────────────────────
+   STATE
+───────────────────────── */
+let currentDay = 1;
+let completedDays = [];
+let todayTasksDone = 0;
+let quickPracticeIndex = 0;
+let quickPracticeRunning = false;
+let quickTimer = null;
+let breathingActive = false;
+let breathTimeout = null;
+let breathCycle = 0;
+let timerActive = false;
+let timerSeconds = 0;
+let timerInterval = null;
+let metronomeActive = false;
+let metronomeInterval = null;
+let currentBPM = 60;
+let audioContext = null;
+let currentWordCat = 'vowel';
+let fearWords = ["","","","",""];
+let ratings = [0,0,0,0,0,0,0];
+let mediaRecorder = null;
+let audioChunks = [];
+let recActive = false;
+let animFrameId = null;
+let audioCtxRec = null;
+let analyserNode = null;
+let phraseIdx = 0;
+
+/* ─────────────────────────
+   INIT
+───────────────────────── */
+async function init() {
+    await loadProgress();
+    updateStreak();
+    updateUI();
+    loadDayContent(currentDay);
+    renderTechniques();
+    renderFearLadder();
+    buildScenarioTabs();
+    buildRatingRow();
+    renderFluencyChart();
+    setTimeout(drawFlatWave, 100);
+}
+
+async function loadProgress() {
+    // 1. Try Supabase first
+    try {
+        setSyncDot('syncing');
+        const row = await sb.get();
+        if (row) {
+            currentDay     = row.current_day      ?? 1;
+            completedDays  = row.completed_days   ?? [];
+            todayTasksDone = row.today_tasks_done  ?? 0;
+            fearWords      = row.fear_words        ?? ["","","","",""];
+            ratings        = row.ratings           ?? [0,0,0,0,0,0,0];
+            localStorage.setItem('fp_streak',    row.streak     ?? 0);
+            localStorage.setItem('fp_lastVisit', row.last_visit ?? '');
+            setSyncDot('synced');
+            return;
         }
-
-        // Generate Phrase Practice
-        function generatePhrase() {
-            const phrase = phrases[Math.floor(Math.random() * phrases.length)];
-            document.getElementById('phrasePractice').innerHTML = 
-                `<div style="font-size: 1.2em; margin: 15px 0;">"${phrase}"</div>
-                <div style="font-size: 0.9em; color: #666; margin-top: 10px;">
-                Repeat 3 times:<br>
-                1st - Very slow<br>
-                2nd - Normal pace<br>
-                3rd - Natural pace
-                </div>`;
+        setSyncDot('synced');
+    } catch(e) {
+        console.warn('Supabase load failed, falling back to localStorage:', e);
+        setSyncDot('error');
+    }
+    // 2. Fallback: localStorage
+    try {
+        const saved = localStorage.getItem('fluency7day_v2');
+        if (saved) {
+            const d = JSON.parse(saved);
+            currentDay     = d.currentDay     ?? 1;
+            completedDays  = d.completedDays  ?? [];
+            todayTasksDone = d.todayTasksDone ?? 0;
+            fearWords      = d.fearWords      ?? ["","","","",""];
+            ratings        = d.ratings        ?? [0,0,0,0,0,0,0];
         }
+    } catch(e) {}
+}
 
-        // Generate Scenario
-        function generateScenario(type) {
-            document.getElementById('scenarioPractice').innerHTML = scenarios[type];
+function saveProgress() {
+    const data = {
+        current_day:      currentDay,
+        completed_days:   completedDays,
+        today_tasks_done: todayTasksDone,
+        fear_words:       fearWords,
+        ratings:          ratings,
+        streak:           parseInt(localStorage.getItem('fp_streak')   || '0'),
+        last_visit:       localStorage.getItem('fp_lastVisit')         || '',
+        sessions:         parseInt(localStorage.getItem('fp_sessions') || '0')
+    };
+    // Always write localStorage as offline backup
+    try {
+        localStorage.setItem('fluency7day_v2', JSON.stringify({
+            currentDay, completedDays, todayTasksDone, fearWords, ratings
+        }));
+    } catch(e) {}
+    // Non-blocking Supabase write
+    setSyncDot('syncing');
+    sb.upsert(data)
+        .then(() => setSyncDot('synced'))
+        .catch(e => { console.warn('Supabase save failed:', e); setSyncDot('error'); });
+}
+
+function updateStreak() {
+    const today = new Date().toDateString();
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+    const lastVisit = localStorage.getItem('fp_lastVisit');
+    let streak = parseInt(localStorage.getItem('fp_streak') || '0');
+    if (lastVisit !== today) {
+        if (lastVisit === yesterday.toDateString()) streak++;
+        else if (lastVisit) streak = 1;
+        else streak = 1;
+        localStorage.setItem('fp_streak', streak);
+        localStorage.setItem('fp_lastVisit', today);
+    }
+    document.getElementById('streak').textContent = streak;
+}
+
+function updateUI() {
+    document.getElementById('currentDay').textContent = currentDay;
+    document.getElementById('completedDays').textContent = completedDays.length + '/7';
+    const done = document.querySelectorAll('.exercise-item.done').length;
+    document.getElementById('todayTasks').textContent = done + '/3';
+
+    const pct = Math.floor((completedDays.length / 7) * 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressBar').textContent = pct + '%';
+    document.getElementById('progressText').textContent =
+        completedDays.length === 7
+            ? '🎉 Program complete! Keep practising!'
+            : (7 - completedDays.length) + ' days remaining. You\'re doing great!';
+
+    document.querySelectorAll('.day-btn').forEach((btn, i) => {
+        const d = i + 1;
+        btn.classList.remove('active', 'completed');
+        if (d === currentDay) btn.classList.add('active');
+        if (completedDays.includes(d)) btn.classList.add('completed');
+    });
+}
+
+/* ─────────────────────────
+   TAB NAV
+───────────────────────── */
+function showTab(id) {
+    document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    const map = { home:0, techniques:1, record:2, aiplan:3 };
+    if (map[id] !== undefined) document.querySelectorAll('.tab-nav-btn')[map[id]].classList.add('active');
+    if (id === 'record') { renderFluencyChart(); setTimeout(drawFlatWave, 50); }
+}
+
+/* ─────────────────────────
+   DAY SWITCHING
+───────────────────────── */
+function switchDay(day) {
+    currentDay = day;
+    todayTasksDone = 0;
+    loadDayContent(day);
+    updateUI();
+    saveProgress();
+}
+
+function loadDayContent(day) {
+    const d = program[day];
+    document.getElementById('dayTitle').textContent = d.title;
+    document.getElementById('dayDescription').innerHTML =
+        `<p style="line-height:1.6;color:#555;font-size:.92em;">${d.description}</p>`;
+    const list = document.getElementById('exerciseList');
+    list.innerHTML = '';
+    d.exercises.forEach((ex, i) => {
+        const li = document.createElement('li');
+        li.className = 'exercise-item';
+        li.innerHTML = `<strong>${i+1}.</strong> ${ex}`;
+        li.onclick = () => { li.classList.toggle('done'); updateTaskCount(); };
+        list.appendChild(li);
+    });
+    document.getElementById('quickExercise').textContent = "Click 'Start Practice' to begin today's quick exercises";
+    document.getElementById('quickPracticeBtn').textContent = 'Start Practice';
+    quickPracticeRunning = false;
+    clearTimeout(quickTimer);
+}
+
+function updateTaskCount() {
+    const done = document.querySelectorAll('.exercise-item.done').length;
+    todayTasksDone = done;
+    document.getElementById('todayTasks').textContent = done + '/3';
+    saveProgress();
+}
+
+function markDayComplete() {
+    if (!completedDays.includes(currentDay)) {
+        completedDays.push(currentDay);
+        if (currentDay < 7) { currentDay++; todayTasksDone = 0; loadDayContent(currentDay); }
+        updateUI();
+        saveProgress();
+        showToast('🎉 Day complete! Great work!');
+    } else {
+        showToast('This day is already completed!');
+    }
+}
+
+/* ─────────────────────────
+   QUICK PRACTICE
+───────────────────────── */
+function startQuickPractice() {
+    if (quickPracticeRunning) {
+        quickPracticeRunning = false;
+        clearTimeout(quickTimer);
+        document.getElementById('quickPracticeBtn').textContent = 'Start Practice';
+        document.getElementById('quickExercise').textContent = "Click 'Start Practice' to begin today's quick exercises";
+        return;
+    }
+    quickPracticeRunning = true;
+    quickPracticeIndex = 0;
+    document.getElementById('quickPracticeBtn').textContent = 'Stop';
+    showNextQuick();
+}
+
+function showNextQuick() {
+    if (!quickPracticeRunning) return;
+    const exs = program[currentDay].quickPractice;
+    if (quickPracticeIndex < exs.length) {
+        document.getElementById('quickExercise').innerHTML =
+            `<strong>Step ${quickPracticeIndex+1}/${exs.length}</strong><br><br>${exs[quickPracticeIndex]}<br><br><em style="font-size:.82em;color:#888;">Next in 8 seconds…</em>`;
+        quickPracticeIndex++;
+        quickTimer = setTimeout(() => { if (quickPracticeRunning) showNextQuick(); }, 8000);
+    } else {
+        document.getElementById('quickExercise').innerHTML = '<strong style="color:#28a745">✅ Quick practice complete! Excellent work!</strong>';
+        document.getElementById('quickPracticeBtn').textContent = 'Start Again';
+        quickPracticeRunning = false;
+    }
+}
+
+/* ─────────────────────────
+   PRACTICE TOOLS
+───────────────────────── */
+function showTool(tool) {
+    ['breathingTool','readingTool','metronomeTool','wordTool','phraseTool','scenarioTool']
+        .forEach(id => document.getElementById(id).classList.add('hidden'));
+    const map = { breathing:'breathingTool', reading:'readingTool', metronome:'metronomeTool', word:'wordTool', phrase:'phraseTool', scenario:'scenarioTool' };
+    if (map[tool]) document.getElementById(map[tool]).classList.remove('hidden');
+}
+
+/* Breathing */
+function startBreathing() {
+    if (breathingActive) {
+        breathingActive = false; clearTimeout(breathTimeout);
+        document.getElementById('breathingBtn').textContent = 'Start Breathing';
+        document.getElementById('breathingText').textContent = 'Ready to breathe';
+        document.getElementById('breathingCircle').className = 'breathing-circle';
+        return;
+    }
+    breathingActive = true; breathCycle = 0;
+    document.getElementById('breathingBtn').textContent = '■ Stop';
+    runBreathCycle();
+}
+
+function runBreathCycle() {
+    if (!breathingActive || breathCycle >= 5) {
+        if (breathCycle >= 5) {
+            document.getElementById('breathingText').textContent = '✅ 5 cycles complete!';
+            document.getElementById('breathingBtn').textContent = 'Start Breathing';
         }
+        breathingActive = false;
+        document.getElementById('breathingCircle').className = 'breathing-circle';
+        return;
+    }
+    const circle = document.getElementById('breathingCircle');
+    const text = document.getElementById('breathingText');
+    text.textContent = `Cycle ${breathCycle+1}/5 — Breathe In`;
+    circle.className = 'breathing-circle inhale';
+    breathTimeout = setTimeout(() => {
+        if (!breathingActive) return;
+        text.textContent = 'Hold…';
+        breathTimeout = setTimeout(() => {
+            if (!breathingActive) return;
+            text.textContent = 'Breathe Out…';
+            circle.className = 'breathing-circle';
+            breathTimeout = setTimeout(() => { if (breathingActive) { breathCycle++; runBreathCycle(); } }, 6000);
+        }, 2000);
+    }, 4000);
+}
 
-        // Initialize
-        function init() {
-            loadProgress();
-            updateUI();
-            loadDayContent(currentDay);
-        }
+/* Reading */
+function generateReading(level) {
+    const texts = readingTexts[level];
+    document.getElementById('readingContent').textContent = texts[Math.floor(Math.random() * texts.length)];
+}
 
-        // Load Progress
-        function loadProgress() {
-            const saved = localStorage.getItem('fluency7day');
-            if (saved) {
-                const data = JSON.parse(saved);
-                currentDay = data.currentDay || 1;
-                completedDays = data.completedDays || [];
-                todayTasksDone = data.todayTasksDone || 0;
-            }
-        }
+function toggleTimer() {
+    if (timerActive) {
+        clearInterval(timerInterval); timerActive = false;
+        document.getElementById('timerBtn').textContent = 'Start Timer';
+    } else {
+        timerActive = true; timerSeconds = 0;
+        document.getElementById('timerBtn').textContent = '■ Stop Timer';
+        timerInterval = setInterval(() => {
+            timerSeconds++;
+            const m = Math.floor(timerSeconds/60), s = timerSeconds%60;
+            document.getElementById('timer').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+        }, 1000);
+    }
+}
 
-        // Save Progress
-        function saveProgress() {
-            const data = {
-                currentDay,
-                completedDays,
-                todayTasksDone,
-                lastVisit: new Date().toDateString()
-            };
-            localStorage.setItem('fluency7day', JSON.stringify(data));
-        }
-
-        // Update UI
-        function updateUI() {
-            document.getElementById('currentDay').textContent = currentDay;
-            document.getElementById('completedDays').textContent = `${completedDays.length}/7`;
-            document.getElementById('todayTasks').textContent = `${todayTasksDone}/3`;
-            
-            // Calculate streak
-            const lastVisit = localStorage.getItem('lastVisit');
-            const today = new Date().toDateString();
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            
-            let streak = parseInt(localStorage.getItem('streak') || '0');
-            if (lastVisit !== today) {
-                if (lastVisit === yesterday.toDateString()) {
-                    streak++;
-                } else if (lastVisit) {
-                    streak = 1;
-                }
-                localStorage.setItem('streak', streak);
-                localStorage.setItem('lastVisit', today);
-            }
-            document.getElementById('streak').textContent = streak;
-
-            // Update progress bar
-            const progress = Math.floor((completedDays.length / 7) * 100);
-            document.getElementById('progressBar').style.width = progress + '%';
-            document.getElementById('progressBar').textContent = progress + '%';
-            
-            if (completedDays.length === 7) {
-                document.getElementById('progressText').textContent = '🎉 Program Complete! Keep practicing!';
-            } else {
-                document.getElementById('progressText').textContent = 
-                    `${7 - completedDays.length} days remaining. You're doing great!`;
-            }
-
-            // Update day buttons
-            document.querySelectorAll('.day-btn').forEach((btn, index) => {
-                const day = index + 1;
-                btn.classList.remove('active', 'completed');
-                if (day === currentDay) {
-                    btn.classList.add('active');
-                }
-                if (completedDays.includes(day)) {
-                    btn.classList.add('completed');
-                }
-            });
-        }
-
-        // Switch Day
-        function switchDay(day) {
-            currentDay = day;
-            todayTasksDone = 0;
-            loadDayContent(day);
-            updateUI();
-            saveProgress();
-        }
-
-        // Load Day Content
-        function loadDayContent(day) {
-            const dayData = program[day];
-            document.getElementById('dayTitle').textContent = dayData.title;
-            document.getElementById('dayDescription').innerHTML = 
-                `<p style="line-height: 1.6; color: #555;">${dayData.description}</p>`;
-            
-            // Load exercises
-            const exerciseList = document.getElementById('exerciseList');
-            exerciseList.innerHTML = '';
-            dayData.exercises.forEach((ex, i) => {
-                const li = document.createElement('li');
-                li.className = 'exercise-item';
-                li.innerHTML = `<strong>${i + 1}.</strong> ${ex}`;
-                li.onclick = () => {
-                    li.classList.toggle('done');
-                    updateTaskCount();
-                };
-                exerciseList.appendChild(li);
-            });
-
-            // Reset quick practice
-            document.getElementById('quickExercise').innerHTML = 
-                "Click 'Start Practice' to begin today's quick exercises";
-            document.getElementById('quickPracticeBtn').textContent = 'Start Practice';
-            quickPracticeRunning = false;
-        }
-
-        // Update Task Count
-        function updateTaskCount() {
-            const done = document.querySelectorAll('.exercise-item.done').length;
-            todayTasksDone = done;
-            document.getElementById('todayTasks').textContent = `${done}/3`;
-            saveProgress();
-        }
-
-        // Mark Day Complete
-        function markDayComplete() {
-            if (!completedDays.includes(currentDay)) {
-                completedDays.push(currentDay);
-                if (currentDay < 7) {
-                    currentDay++;
-                    todayTasksDone = 0;
-                    loadDayContent(currentDay);
-                }
-                updateUI();
-                saveProgress();
-                alert('🎉 Day completed! Great work!');
-            } else {
-                alert('This day is already completed!');
-            }
-        }
-
-        // Quick Practice
-        function startQuickPractice() {
-            if (quickPracticeRunning) {
-                quickPracticeRunning = false;
-                document.getElementById('quickPracticeBtn').textContent = 'Start Practice';
-                document.getElementById('quickExercise').innerHTML = 
-                    "Click 'Start Practice' to begin today's quick exercises";
-                return;
-            }
-
-            quickPracticeRunning = true;
-            quickPracticeIndex = 0;
-            document.getElementById('quickPracticeBtn').textContent = 'Stop Practice';
-            showNextQuickExercise();
-        }
-
-        function showNextQuickExercise() {
-            if (!quickPracticeRunning) return;
-
-            const exercises = program[currentDay].quickPractice;
-            if (quickPracticeIndex < exercises.length) {
-                const exerciseNum = quickPracticeIndex + 1;
-                const total = exercises.length;
-                document.getElementById('quickExercise').innerHTML = 
-                    `<strong>Exercise ${exerciseNum}/${total}</strong><br><br>${exercises[quickPracticeIndex]}<br><br><em>Next exercise in 8 seconds...</em>`;
-                quickPracticeIndex++;
-                setTimeout(() => {
-                    if (quickPracticeRunning) {
-                        showNextQuickExercise();
-                    }
-                }, 8000); // 8 seconds per exercise
-            } else {
-                document.getElementById('quickExercise').innerHTML = 
-                    '✅ Quick practice complete! Excellent work!';
-                document.getElementById('quickPracticeBtn').textContent = 'Practice Again';
-                quickPracticeRunning = false;
-            }
-        }
-
-        // Show Tool
-        function showTool(tool) {
-            document.getElementById('breathingTool').classList.add('hidden');
-            document.getElementById('readingTool').classList.add('hidden');
-            document.getElementById('metronomeTool').classList.add('hidden');
-            document.getElementById('wordTool').classList.add('hidden');
-            document.getElementById('phraseTool').classList.add('hidden');
-            document.getElementById('scenarioTool').classList.add('hidden');
-            
-            if (tool === 'breathing') {
-                document.getElementById('breathingTool').classList.remove('hidden');
-            } else if (tool === 'reading') {
-                document.getElementById('readingTool').classList.remove('hidden');
-            } else if (tool === 'metronome') {
-                document.getElementById('metronomeTool').classList.remove('hidden');
-            } else if (tool === 'word') {
-                document.getElementById('wordTool').classList.remove('hidden');
-            } else if (tool === 'phrase') {
-                document.getElementById('phraseTool').classList.remove('hidden');
-            } else if (tool === 'scenario') {
-                document.getElementById('scenarioTool').classList.remove('hidden');
-            }
-        }
-
-        // Breathing Exercise
-        function startBreathing() {
-            if (breathingActive) {
-                stopBreathing();
-                document.getElementById('breathingBtn').textContent = 'Start Breathing';
-                document.getElementById('breathingText').textContent = 'Ready to breathe';
-                return;
-            }
-            breathingActive = true;
-            document.getElementById('breathingBtn').textContent = 'Stop';
-            runBreathingCycle(0);
-        }
-
-        function runBreathingCycle(cycle) {
-            if (!breathingActive || cycle >= 5) {
-                stopBreathing();
-                if (cycle >= 5) {
-                    document.getElementById('breathingText').textContent = '✅ Complete! 5 cycles done';
-                    document.getElementById('breathingBtn').textContent = 'Start Breathing';
-                }
-                return;
-            }
-
-            const circle = document.getElementById('breathingCircle');
-            const text = document.getElementById('breathingText');
-
-            // Inhale
-            text.textContent = `Cycle ${cycle + 1}/5: Breathe In...`;
-            circle.classList.add('inhale');
-
-            setTimeout(() => {
-                if (!breathingActive) return;
-                text.textContent = 'Hold...';
-                
-                setTimeout(() => {
-                    if (!breathingActive) return;
-                    text.textContent = 'Breathe Out...';
-                    circle.classList.remove('inhale');
-                    
-                    setTimeout(() => {
-                        if (breathingActive) {
-                            runBreathingCycle(cycle + 1);
-                        }
-                    }, 6000);
-                }, 2000);
-            }, 4000);
-        }
-
-        function stopBreathing() {
-            breathingActive = false;
-            document.getElementById('breathingCircle').classList.remove('inhale');
-        }
-
-        // Timer
-        function toggleTimer() {
-            if (timerActive) {
-                stopTimer();
-                document.getElementById('timerBtn').textContent = 'Start Reading Timer';
-            } else {
-                startTimer();
-                document.getElementById('timerBtn').textContent = 'Stop Timer';
-            }
-        }
-
-        function startTimer() {
-            timerActive = true;
-            timerSeconds = 0;
-            timerInterval = setInterval(() => {
-                timerSeconds++;
-                const mins = Math.floor(timerSeconds / 60);
-                const secs = timerSeconds % 60;
-                document.getElementById('timer').textContent = 
-                    `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-            }, 1000);
-        }
-
-        function stopTimer() {
-            timerActive = false;
-            clearInterval(timerInterval);
-        }
-
-        // Metronome
-        function toggleMetronome() {
-            if (metronomeActive) {
-                stopMetronome();
-                document.getElementById('metronomeBtn').textContent = 'Start Metronome';
-            } else {
-                startMetronome();
-                document.getElementById('metronomeBtn').textContent = 'Stop Metronome';
-            }
-        }
-
-        function startMetronome() {
-            metronomeActive = true;
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const interval = 60000 / currentBPM;
-            
-            metronomeInterval = setInterval(() => {
-                playBeep();
-                const display = document.getElementById('metronomeDisplay');
-                display.classList.add('beat');
-                setTimeout(() => display.classList.remove('beat'), 100);
-            }, interval);
-        }
-
-        function stopMetronome() {
-            metronomeActive = false;
-            clearInterval(metronomeInterval);
-        }
-
-        function updateBPM(value) {
-            currentBPM = value;
-            document.getElementById('bpmDisplay').textContent = value + ' BPM';
-            if (metronomeActive) {
-                stopMetronome();
-                startMetronome();
-            }
-        }
-
-        function playBeep() {
-            if (!audioContext) return;
+/* Metronome */
+function toggleMetronome() {
+    if (metronomeActive) {
+        metronomeActive = false; clearInterval(metronomeInterval);
+        document.getElementById('metronomeBtn').textContent = 'Start Metronome';
+    } else {
+        metronomeActive = true;
+        document.getElementById('metronomeBtn').textContent = '■ Stop Metronome';
+        audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+        const ms = 60000 / currentBPM;
+        const beat = () => {
             const osc = audioContext.createOscillator();
             const gain = audioContext.createGain();
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            osc.frequency.value = 800;
-            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-            osc.start(audioContext.currentTime);
-            osc.stop(audioContext.currentTime + 0.1);
-        }
+            osc.connect(gain); gain.connect(audioContext.destination);
+            osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.25, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.08);
+            osc.start(); osc.stop(audioContext.currentTime + 0.08);
+            const d = document.getElementById('metronomeDisplay');
+            d.classList.add('beat');
+            setTimeout(() => d.classList.remove('beat'), 80);
+        };
+        beat();
+        metronomeInterval = setInterval(beat, ms);
+    }
+}
 
-        // Initialize on load
-        window.onload = init;
-    </script>
+function updateBPM(val) {
+    currentBPM = parseInt(val);
+    document.getElementById('bpmDisplay').textContent = val + ' BPM';
+    if (metronomeActive) { clearInterval(metronomeInterval); metronomeActive = false; toggleMetronome(); }
+}
+
+/* Words */
+function wordCat(cat, btn) {
+    currentWordCat = cat;
+    document.querySelectorAll('.word-cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    generateWord();
+}
+
+function generateWord() {
+    const list = wordLists[currentWordCat];
+    if (!list || list.length === 0) {
+        document.getElementById('wordPractice').innerHTML = '<div style="font-size:.9em;color:#888;">Add your feared words in the Techniques tab first!</div>';
+        return;
+    }
+    const w = list[Math.floor(Math.random() * list.length)];
+    const hints = { vowel:'Stretch the vowel · Gentle start · Repeat 5×', hard:'Light lip/tongue contact · No force · Repeat 5×', feared:'Breathe first · Easy onset · You can do this ✓', name:'Gentle start · Own your name · Say it confidently' };
+    document.getElementById('wordPractice').innerHTML =
+        `<div style="font-size:2em;font-weight:bold;color:#667eea;margin:10px 0;">${w}</div>
+         <div style="font-size:.85em;color:#888;">${hints[currentWordCat]||'Gentle start · Repeat 5×'}</div>`;
+}
+
+/* Phrases */
+function generatePhrase() {
+    const p = phrases[phraseIdx % phrases.length];
+    document.getElementById('phrasePractice').innerHTML = `<div style="font-size:1.1em;margin:10px 0;">"${p}"</div>`;
+    phraseIdx++;
+}
+
+/* Scenarios */
+function buildScenarioTabs() {
+    const tabs = document.getElementById('scenarioTabs');
+    tabs.innerHTML = '';
+    Object.entries(scenarios).forEach(([key, s], i) => {
+        const btn = document.createElement('button');
+        btn.className = 'scenario-tab' + (i === 0 ? ' active' : '');
+        btn.textContent = s.label;
+        btn.onclick = () => {
+            document.querySelectorAll('.scenario-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadScenario(key);
+        };
+        tabs.appendChild(btn);
+    });
+    loadScenario('intro');
+}
+
+function loadScenario(key) {
+    const s = scenarios[key];
+    document.getElementById('scenarioPractice').innerHTML =
+        '<p style="font-size:.8em;color:#888;margin-bottom:8px;">Tap a line to highlight it. Read each aloud using easy onset.</p>'
+        + s.lines.map(l => `<div class="scenario-line" onclick="this.style.background=this.style.background?'':'#f0eeff'">${l}</div>`).join('');
+}
+
+/* ─────────────────────────
+   TECHNIQUES
+───────────────────────── */
+function renderTechniques() {
+    const list = document.getElementById('techniqueList');
+    list.innerHTML = '';
+    TECHNIQUES.forEach((t, i) => {
+        const el = document.createElement('div');
+        el.className = 'technique-card';
+        el.innerHTML = `
+            <div class="technique-header" onclick="toggleTech(${i})">
+                <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+                    <span style="font-size:1.3em;flex-shrink:0;">${t.icon}</span>
+                    <div style="min-width:0;">
+                        <div style="font-weight:600;font-size:.95em;">${t.name}</div>
+                        <div style="font-size:.75em;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.desc}</div>
+                    </div>
+                </div>
+                <span class="technique-badge ${t.badgeClass}">${t.badge}</span>
+            </div>
+            <div class="technique-body" id="tech-${i}">
+                ${t.steps.map((s,si) => `<div class="technique-step"><div class="step-num">${si+1}</div><div class="step-text">${s}</div></div>`).join('')}
+            </div>`;
+        list.appendChild(el);
+    });
+}
+
+function toggleTech(i) { document.getElementById('tech-' + i).classList.toggle('open'); }
+
+/* ─────────────────────────
+   FEAR LADDER
+───────────────────────── */
+function renderFearLadder() {
+    const ladder = document.getElementById('fearLadder');
+    ladder.innerHTML = '';
+    FEAR_LEVELS.forEach((r, i) => {
+        const el = document.createElement('div');
+        el.className = 'fear-rung';
+        el.innerHTML = `
+            <div class="fear-level-badge">${r.level}</div>
+            <div style="flex:1;">
+                <div style="font-weight:600;font-size:.88em;">${r.label}</div>
+                <div style="font-size:.78em;color:#888;">${r.desc}</div>
+                <input class="fear-input" id="fear-${i}" placeholder="Enter word or situation…" value="${fearWords[i]||''}">
+            </div>`;
+        ladder.appendChild(el);
+    });
+}
+
+function saveFearWords() {
+    fearWords = FEAR_LEVELS.map((_, i) => document.getElementById('fear-' + i).value.trim());
+    wordLists.feared = fearWords.filter(w => w.length > 0);
+    saveProgress();
+    showToast('Feared words saved! Available in the Words tool.');
+}
+
+/* ─────────────────────────
+   VOICE RECORDER
+───────────────────────── */
+async function toggleRecording() {
+    if (recActive) { stopRecording(); return; }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            const url = URL.createObjectURL(blob);
+            const audio = document.getElementById('audioPlayback');
+            audio.src = url; audio.style.display = 'block';
+            document.getElementById('playBtn').disabled = false;
+            stream.getTracks().forEach(t => t.stop());
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            drawFlatWave();
+            showToast('Recording saved — press ▶ Play Back to listen.');
+        };
+        audioCtxRec = new (window.AudioContext || window.webkitAudioContext)();
+        analyserNode = audioCtxRec.createAnalyser();
+        analyserNode.fftSize = 256;
+        audioCtxRec.createMediaStreamSource(stream).connect(analyserNode);
+        mediaRecorder.start();
+        recActive = true;
+        document.getElementById('recBtn').textContent = '⏹ Stop';
+        document.getElementById('recIndicator').classList.remove('hidden');
+        drawLiveWave();
+    } catch(e) {
+        showToast('Microphone access denied. Please allow mic in browser settings.');
+    }
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    recActive = false;
+    document.getElementById('recBtn').textContent = '⏺ Record';
+    document.getElementById('recIndicator').classList.add('hidden');
+}
+
+function playbackAudio() {
+    const a = document.getElementById('audioPlayback');
+    if (a.src) a.play();
+}
+
+function clearRecording() {
+    const a = document.getElementById('audioPlayback');
+    a.src = ''; a.style.display = 'none';
+    document.getElementById('playBtn').disabled = true;
+    audioChunks = [];
+    drawFlatWave();
+    showToast('Recording cleared.');
+}
+
+function drawFlatWave() {
+    const c = document.getElementById('waveCanvas');
+    if (!c) return;
+    c.width = c.offsetWidth || 500; c.height = c.offsetHeight || 56;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.strokeStyle = '#667eea'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, c.height/2); ctx.lineTo(c.width, c.height/2); ctx.stroke();
+}
+
+function drawLiveWave() {
+    if (!recActive) { drawFlatWave(); return; }
+    const c = document.getElementById('waveCanvas');
+    if (!c || !analyserNode) return;
+    c.width = c.offsetWidth || 500; c.height = c.offsetHeight || 56;
+    const ctx = c.getContext('2d');
+    const buf = new Uint8Array(analyserNode.frequencyBinCount);
+    analyserNode.getByteTimeDomainData(buf);
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 2.5; ctx.beginPath();
+    const sl = c.width / buf.length;
+    buf.forEach((v, i) => {
+        const x = i * sl, y = (v / 128.0) * (c.height / 2);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    animFrameId = requestAnimationFrame(drawLiveWave);
+}
+
+/* ─────────────────────────
+   FLUENCY RATING
+───────────────────────── */
+function buildRatingRow() {
+    const row = document.getElementById('ratingRow');
+    row.innerHTML = '';
+    for (let r = 1; r <= 10; r++) {
+        const btn = document.createElement('button');
+        btn.className = 'rating-btn' + (ratings[currentDay-1] === r ? ' selected' : '');
+        btn.textContent = r;
+        btn.onclick = () => saveRating(r);
+        row.appendChild(btn);
+    }
+}
+
+function saveRating(r) {
+    ratings[currentDay-1] = r;
+    saveProgress();
+    document.querySelectorAll('.rating-btn').forEach((b, i) => b.classList.toggle('selected', i+1 === r));
+    document.getElementById('ratingFeedback').textContent = `Day ${currentDay}: ${r}/10 — ${RATING_MSGS[r]}`;
+    renderFluencyChart();
+    showToast('Fluency rating ' + r + '/10 saved!');
+}
+
+function renderFluencyChart() {
+    const chart = document.getElementById('fluencyChart');
+    if (!chart) return;
+    chart.innerHTML = '';
+    const maxH = 60;
+    for (let d = 0; d < 7; d++) {
+        const r = ratings[d];
+        const h = r > 0 ? Math.max(6, Math.round((r/10)*maxH)) : 4;
+        const col = document.createElement('div');
+        col.className = 'chart-col';
+        col.innerHTML = `
+            <div class="chart-bar-wrap">
+                <div class="chart-bar${r>0?' filled':''}" style="height:${h}px;" title="Day ${d+1}: ${r||'—'}/10" onclick="tapBar(${d+1})"></div>
+            </div>
+            <div class="chart-label">D${d+1}</div>`;
+        chart.appendChild(col);
+    }
+}
+
+function tapBar(day) {
+    const r = parseInt(prompt('Rate Day ' + day + ' fluency (1–10):'));
+    if (r >= 1 && r <= 10) { ratings[day-1] = r; saveProgress(); renderFluencyChart(); showToast('Day ' + day + ' rated ' + r + '/10'); }
+}
+
+/* ─────────────────────────
+   AI PLAN
+───────────────────────── */
+async function generateAIPlan() {
+    const type    = document.getElementById('ai-type').value;
+    const trigger = document.getElementById('ai-trigger').value;
+    const level   = document.getElementById('ai-level').value;
+    const context = document.getElementById('ai-context').value;
+
+    const wrap = document.getElementById('ai-output-wrap');
+    const output = document.getElementById('ai-output');
+    wrap.classList.remove('hidden');
+    output.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Generating your personalised plan…</div>';
+
+    const prompt = `You are an expert speech-language pathologist specialising in stuttering therapy with 30 years of experience. Generate a warm, detailed, highly personalised 7-day daily practice plan.
+
+Patient profile:
+- Primary stuttering type: ${type}
+- Hardest speaking situation: ${trigger}
+- Experience level: ${level}
+- Additional context: ${context || 'None provided'}
+
+Structure your response with clear Day 1: through Day 7: headers. For each day include: a therapeutic focus title, 3 specific exercises with timing, one clinical insight specific to their stuttering type, and one practical technique tip. End with a brief encouraging paragraph. Be compassionate, evidence-based, and highly specific to their profile.`;
+
+    try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 1000,
+                messages: [{ role: 'user', content: prompt }]
+            })
+        });
+        const data = await res.json();
+        const text = data.content?.map(c => c.text || '').join('') || 'Could not generate plan. Please try again.';
+        output.textContent = text;
+    } catch(e) {
+        output.textContent = 'Error connecting to AI. Please check your connection and try again.';
+    }
+}
+
+function copyAIPlan() {
+    const txt = document.getElementById('ai-output').textContent;
+    navigator.clipboard.writeText(txt).then(() => showToast('Plan copied to clipboard!'));
+}
+
+/* ─────────────────────────
+   TOAST
+───────────────────────── */
+let toastTimeout = null;
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+window.onload = init;
+window.addEventListener('resize', drawFlatWave);
+</script>
 </body>
 </html>
