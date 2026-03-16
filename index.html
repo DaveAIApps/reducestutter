@@ -272,7 +272,65 @@
         .rec-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85em; color: #dc3545; font-weight: 600; }
         .rec-dot { width: 9px; height: 9px; border-radius: 50%; background: #dc3545; animation: blink 1s infinite; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-        audio#audioPlayback { width: 100%; margin-top: 10px; border-radius: 8px; }
+
+        /* Recordings List */
+        .recordings-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin: 16px 0 8px;
+        }
+        .recordings-header span { font-size: 0.88em; font-weight: 700; color: #444; }
+        .recordings-empty {
+            text-align: center; color: #aaa; font-size: 0.85em;
+            padding: 18px 10px; border: 2px dashed #e0d8ff; border-radius: 10px;
+            margin: 8px 0;
+        }
+        .rec-list { list-style: none; margin: 0; padding: 0; }
+        .rec-item {
+            background: #f8f9fa;
+            border: 1.5px solid #e8e4ff;
+            border-radius: 12px;
+            margin: 8px 0;
+            overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .rec-item.selected {
+            border-color: #dc3545;
+            background: #fff5f5;
+            box-shadow: 0 0 0 2px rgba(220,53,69,0.15);
+        }
+        .rec-item.playing {
+            border-color: #667eea;
+            background: #f0eeff;
+            box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
+        }
+        .rec-item-top {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px;
+        }
+        .rec-checkbox {
+            width: 20px; height: 20px; border-radius: 6px; border: 2px solid #ccc;
+            cursor: pointer; flex-shrink: 0; accent-color: #dc3545;
+        }
+        .rec-info { flex: 1; min-width: 0; }
+        .rec-name { font-size: 0.88em; font-weight: 700; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .rec-meta { font-size: 0.75em; color: #888; margin-top: 2px; }
+        .rec-play-btn {
+            width: 36px; height: 36px; border-radius: 50%; border: none;
+            background: #667eea; color: white; font-size: 0.95em;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: background 0.2s, transform 0.15s;
+            touch-action: manipulation;
+        }
+        .rec-play-btn:active { transform: scale(0.92); }
+        .rec-play-btn.playing { background: #764ba2; }
+        .rec-audio-wrap { padding: 0 12px 10px; }
+        .rec-audio-wrap audio { width: 100%; border-radius: 8px; display: block; height: 36px; }
+        .rec-bulk-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #fff5f5; border: 1.5px solid #f5c6cb;
+            border-radius: 10px; padding: 8px 14px; margin: 8px 0;
+            font-size: 0.85em; color: #dc3545; font-weight: 600;
+        }
 
         /* Techniques */
         .technique-card { background: white; border-radius: 10px; margin: 10px 0; overflow: hidden; border-left: 4px solid #667eea; }
@@ -570,13 +628,21 @@
                 </div>
                 <div class="rec-row">
                     <button class="btn btn-small btn-danger" id="recBtn" onclick="toggleRecording()" style="width:auto;">⏺ Record</button>
-                    <button class="btn btn-small" id="playBtn" onclick="playbackAudio()" disabled style="width:auto;">▶ Play Back</button>
-                    <button class="btn btn-small btn-secondary" onclick="clearRecording()" style="width:auto;">🗑 Clear</button>
                     <div class="rec-indicator hidden" id="recIndicator">
                         <div class="rec-dot"></div> Recording…
                     </div>
                 </div>
-                <audio id="audioPlayback" controls style="display:none;width:100%;margin-top:12px;"></audio>
+
+                <!-- Recordings List -->
+                <div class="recordings-header">
+                    <span>🎧 Recordings</span>
+                </div>
+                <div id="recBulkBar" style="display:none;" class="rec-bulk-bar">
+                    <span id="recSelCount">0 selected</span>
+                    <button class="btn btn-small btn-danger" onclick="deleteSelectedRecordings()" style="width:auto;padding:6px 14px;">🗑 Delete Selected</button>
+                </div>
+                <div id="recEmptyMsg" class="recordings-empty">No recordings yet — press ⏺ Record to start.</div>
+                <ul class="rec-list" id="recList"></ul>
             </div>
 
             <div class="card">
@@ -937,6 +1003,9 @@ let recActive = false;
 let animFrameId = null;
 let audioCtxRec = null;
 let analyserNode = null;
+let recordings = [];
+let currentPlayingId = null;
+let recStartTime = null;
 let phraseIdx = 0;
 
 /* ─────────────────────────
@@ -1361,29 +1430,56 @@ function saveFearWords() {
 /* ─────────────────────────
    VOICE RECORDER
 ───────────────────────── */
+
+function formatDuration(secs) {
+    const m = Math.floor(secs / 60), s = Math.floor(secs % 60);
+    return m + ':' + String(s).padStart(2, '0');
+}
+
+function formatTimestamp(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString(undefined, { month:'short', day:'numeric' }) + ' ' +
+           d.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
+}
+
 async function toggleRecording() {
     if (recActive) { stopRecording(); return; }
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioChunks = [];
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        recStartTime = Date.now();
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
+                         MediaRecorder.isTypeSupported('audio/webm')             ? 'audio/webm'             :
+                         MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')  ? 'audio/ogg;codecs=opus'  :
+                         MediaRecorder.isTypeSupported('audio/mp4')              ? 'audio/mp4'              : '';
+        mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) audioChunks.push(e.data); };
         mediaRecorder.onstop = () => {
-            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            const elapsed = (Date.now() - recStartTime) / 1000;
+            const usedMime = mimeType || (audioChunks[0] && audioChunks[0].type) || 'audio/webm';
+            const blob = new Blob(audioChunks, { type: usedMime });
             const url = URL.createObjectURL(blob);
-            const audio = document.getElementById('audioPlayback');
-            audio.src = url; audio.style.display = 'block';
-            document.getElementById('playBtn').disabled = false;
+            const recNum = recordings.length + 1;
+            const rec = {
+                id: 'rec_' + Date.now(),
+                name: 'Recording ' + recNum,
+                url,
+                blob,
+                duration: elapsed,
+                timestamp: Date.now()
+            };
+            recordings.push(rec);
             stream.getTracks().forEach(t => t.stop());
             if (animFrameId) cancelAnimationFrame(animFrameId);
             drawFlatWave();
-            showToast('Recording saved — press ▶ Play Back to listen.');
+            renderRecordingsList();
+            showToast('✅ Recording ' + recNum + ' saved — tap ▶ to play.');
         };
         audioCtxRec = new (window.AudioContext || window.webkitAudioContext)();
         analyserNode = audioCtxRec.createAnalyser();
         analyserNode.fftSize = 256;
         audioCtxRec.createMediaStreamSource(stream).connect(analyserNode);
-        mediaRecorder.start();
+        mediaRecorder.start(250);
         recActive = true;
         document.getElementById('recBtn').textContent = '⏹ Stop';
         document.getElementById('recIndicator').classList.remove('hidden');
@@ -1400,18 +1496,107 @@ function stopRecording() {
     document.getElementById('recIndicator').classList.add('hidden');
 }
 
-function playbackAudio() {
-    const a = document.getElementById('audioPlayback');
-    if (a.src) a.play();
+function renderRecordingsList() {
+    const list = document.getElementById('recList');
+    const empty = document.getElementById('recEmptyMsg');
+    const bulkBar = document.getElementById('recBulkBar');
+    list.innerHTML = '';
+
+    if (recordings.length === 0) {
+        empty.style.display = 'block';
+        bulkBar.style.display = 'none';
+        return;
+    }
+    empty.style.display = 'none';
+
+    // Check if any are selected
+    const selected = recordings.filter(r => r.selected);
+    if (selected.length > 0) {
+        bulkBar.style.display = 'flex';
+        document.getElementById('recSelCount').textContent = selected.length + ' selected';
+    } else {
+        bulkBar.style.display = 'none';
+    }
+
+    // Render newest first
+    [...recordings].reverse().forEach(rec => {
+        const li = document.createElement('li');
+        li.className = 'rec-item' + (rec.selected ? ' selected' : '') + (currentPlayingId === rec.id ? ' playing' : '');
+        li.innerHTML = \`
+            <div class="rec-item-top">
+                <input type="checkbox" class="rec-checkbox" \${rec.selected ? 'checked' : ''}
+                    onchange="toggleRecSelect('\${rec.id}', this.checked)" title="Select to delete">
+                <div class="rec-info">
+                    <div class="rec-name">\${rec.name}</div>
+                    <div class="rec-meta">\${formatTimestamp(rec.timestamp)} &nbsp;·&nbsp; \${formatDuration(rec.duration)}</div>
+                </div>
+                <button class="rec-play-btn \${currentPlayingId === rec.id ? 'playing' : ''}"
+                    onclick="togglePlayRec('\${rec.id}')" title="\${currentPlayingId === rec.id ? 'Pause' : 'Play'}">
+                    \${currentPlayingId === rec.id ? '⏸' : '▶'}
+                </button>
+            </div>
+            <div class="rec-audio-wrap">
+                <audio id="audio_\${rec.id}" src="\${rec.url}" controls preload="metadata"
+                    onended="onRecEnded('\${rec.id}')"
+                    onplay="onRecPlay('\${rec.id}')"
+                    onpause="onRecPause('\${rec.id}')"></audio>
+            </div>\`;
+        list.appendChild(li);
+    });
 }
 
-function clearRecording() {
-    const a = document.getElementById('audioPlayback');
-    a.src = ''; a.style.display = 'none';
-    document.getElementById('playBtn').disabled = true;
-    audioChunks = [];
-    drawFlatWave();
-    showToast('Recording cleared.');
+function togglePlayRec(id) {
+    const audio = document.getElementById('audio_' + id);
+    if (!audio) return;
+    if (audio.paused) {
+        // Pause any other playing audio first
+        recordings.forEach(r => {
+            if (r.id !== id) {
+                const a = document.getElementById('audio_' + r.id);
+                if (a && !a.paused) { a.pause(); a.currentTime = 0; }
+            }
+        });
+        audio.play().catch(err => showToast('Playback error — try the player controls directly.'));
+    } else {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+}
+
+function onRecPlay(id) {
+    currentPlayingId = id;
+    renderRecordingsList();
+}
+
+function onRecPause(id) {
+    if (currentPlayingId === id) currentPlayingId = null;
+    renderRecordingsList();
+}
+
+function onRecEnded(id) {
+    if (currentPlayingId === id) currentPlayingId = null;
+    renderRecordingsList();
+}
+
+function toggleRecSelect(id, checked) {
+    const rec = recordings.find(r => r.id === id);
+    if (rec) rec.selected = checked;
+    renderRecordingsList();
+}
+
+function deleteSelectedRecordings() {
+    const toDelete = recordings.filter(r => r.selected);
+    if (toDelete.length === 0) return;
+    if (!confirm('Delete ' + toDelete.length + ' recording(s)? This cannot be undone.')) return;
+    toDelete.forEach(r => {
+        const a = document.getElementById('audio_' + r.id);
+        if (a && !a.paused) a.pause();
+        URL.revokeObjectURL(r.url);
+        if (currentPlayingId === r.id) currentPlayingId = null;
+    });
+    recordings = recordings.filter(r => !r.selected);
+    renderRecordingsList();
+    showToast('🗑 ' + toDelete.length + ' recording(s) deleted.');
 }
 
 function drawFlatWave() {
