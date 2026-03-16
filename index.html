@@ -1431,61 +1431,100 @@ function saveFearWords() {
    VOICE RECORDER
 ───────────────────────── */
 
-function formatDuration(secs) {
-    const m = Math.floor(secs / 60), s = Math.floor(secs % 60);
-    return m + ':' + String(s).padStart(2, '0');
-}
+// Each entry: { id, name, url, blob, duration, timestamp, selected }
+// We never re-create audio elements — we build them once and update in place.
 
+function formatDuration(secs) {
+    var m = Math.floor(secs / 60), s = Math.floor(secs % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+}
 function formatTimestamp(ts) {
-    const d = new Date(ts);
-    return d.toLocaleDateString(undefined, { month:'short', day:'numeric' }) + ' ' +
-           d.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
+    var d = new Date(ts);
+    return d.toLocaleDateString(undefined, { month:'short', day:'numeric' }) +
+           ' ' + d.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
 }
 
 async function toggleRecording() {
     if (recActive) { stopRecording(); return; }
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         audioChunks = [];
         recStartTime = Date.now();
-        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
-                         MediaRecorder.isTypeSupported('audio/webm')             ? 'audio/webm'             :
-                         MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')  ? 'audio/ogg;codecs=opus'  :
-                         MediaRecorder.isTypeSupported('audio/mp4')              ? 'audio/mp4'              : '';
-        mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) audioChunks.push(e.data); };
-        mediaRecorder.onstop = () => {
-            const elapsed = (Date.now() - recStartTime) / 1000;
-            const usedMime = mimeType || (audioChunks[0] && audioChunks[0].type) || 'audio/webm';
-            const blob = new Blob(audioChunks, { type: usedMime });
-            const url = URL.createObjectURL(blob);
-            const recNum = recordings.length + 1;
-            const rec = {
-                id: 'rec_' + Date.now(),
-                name: 'Recording ' + recNum,
-                url,
-                blob,
-                duration: elapsed,
-                timestamp: Date.now()
+
+        // Pick the best supported mime type
+        const MIME_CANDIDATES = [
+            'audio/webm;codecs=opus',
+            'audio/webm',
+            'audio/ogg;codecs=opus',
+            'audio/mp4'
+        ];
+        let chosenMime = '';
+        for (var i = 0; i < MIME_CANDIDATES.length; i++) {
+            if (MediaRecorder.isTypeSupported(MIME_CANDIDATES[i])) {
+                chosenMime = MIME_CANDIDATES[i];
+                break;
+            }
+        }
+
+        try {
+            mediaRecorder = chosenMime
+                ? new MediaRecorder(stream, { mimeType: chosenMime })
+                : new MediaRecorder(stream);
+        } catch(e2) {
+            mediaRecorder = new MediaRecorder(stream);
+            chosenMime = '';
+        }
+
+        mediaRecorder.ondataavailable = function(e) {
+            if (e.data && e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = function() {
+            // Use the recorder's actual mimeType (most reliable)
+            var blobMime = mediaRecorder.mimeType || chosenMime || 'audio/webm';
+            var blob = new Blob(audioChunks, { type: blobMime });
+            var url  = URL.createObjectURL(blob);
+            var elapsed = Math.max(1, (Date.now() - recStartTime) / 1000);
+            var recNum = recordings.length + 1;
+
+            var rec = {
+                id:        'rec_' + Date.now(),
+                name:      'Recording ' + recNum,
+                url:       url,
+                blob:      blob,
+                duration:  elapsed,
+                timestamp: Date.now(),
+                selected:  false
             };
             recordings.push(rec);
-            stream.getTracks().forEach(t => t.stop());
-            if (animFrameId) cancelAnimationFrame(animFrameId);
+
+            stream.getTracks().forEach(function(t) { t.stop(); });
+            if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
             drawFlatWave();
-            renderRecordingsList();
-            showToast('✅ Recording ' + recNum + ' saved — tap ▶ to play.');
+            addRecordingToList(rec);   // add ONE item — never re-render the whole list
+            updateBulkBar();
+            showToast('Recording ' + recNum + ' saved — tap ▶ to play.');
         };
-        audioCtxRec = new (window.AudioContext || window.webkitAudioContext)();
-        analyserNode = audioCtxRec.createAnalyser();
-        analyserNode.fftSize = 256;
-        audioCtxRec.createMediaStreamSource(stream).connect(analyserNode);
-        mediaRecorder.start(250);
+
+        // Wire up live waveform
+        try {
+            audioCtxRec = new (window.AudioContext || window.webkitAudioContext)();
+            analyserNode = audioCtxRec.createAnalyser();
+            analyserNode.fftSize = 256;
+            audioCtxRec.createMediaStreamSource(stream).connect(analyserNode);
+        } catch(e3) { analyserNode = null; }
+
+        mediaRecorder.start(100);   // small timeslice — data comes in often
         recActive = true;
         document.getElementById('recBtn').textContent = '⏹ Stop';
         document.getElementById('recIndicator').classList.add('visible');
         drawLiveWave();
-    } catch(e) {
-        showToast('Microphone access denied. Please allow mic in browser settings.');
+
+    } catch(err) {
+        var msg = (err && err.name === 'NotAllowedError')
+            ? 'Microphone access denied. Please allow mic in browser settings.'
+            : 'Could not start recording: ' + (err && err.message || err);
+        showToast(msg);
     }
 }
 
@@ -1496,139 +1535,188 @@ function stopRecording() {
     document.getElementById('recIndicator').classList.remove('visible');
 }
 
-function renderRecordingsList() {
-    var list = document.getElementById('recList');
-    var empty = document.getElementById('recEmptyMsg');
-    var bulkBar = document.getElementById('recBulkBar');
-    list.innerHTML = '';
+/* ── Build / update the list without ever destroying audio elements ── */
 
-    if (recordings.length === 0) {
-        empty.style.display = 'block';
-        bulkBar.style.display = 'none';
-        return;
-    }
+function addRecordingToList(rec) {
+    var list  = document.getElementById('recList');
+    var empty = document.getElementById('recEmptyMsg');
     empty.style.display = 'none';
 
-    var selected = recordings.filter(function(r) { return r.selected; });
-    if (selected.length > 0) {
-        bulkBar.style.display = 'flex';
-        document.getElementById('recSelCount').textContent = selected.length + ' selected';
-    } else {
-        bulkBar.style.display = 'none';
-    }
+    var li = document.createElement('li');
+    li.className = 'rec-item';
+    li.id = 'recli_' + rec.id;
 
-    var reversed = recordings.slice().reverse();
-    reversed.forEach(function(rec) {
-        var li = document.createElement('li');
-        var cls = 'rec-item';
-        if (rec.selected) cls += ' selected';
-        if (currentPlayingId === rec.id) cls += ' playing';
-        li.className = cls;
+    // Top row: checkbox + info + play button
+    var top = document.createElement('div');
+    top.className = 'rec-item-top';
 
-        var playingClass = currentPlayingId === rec.id ? 'playing' : '';
-        var playIcon = currentPlayingId === rec.id ? '&#9646;&#9646;' : '&#9654;';
-        var checkedAttr = rec.selected ? 'checked' : '';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'rec-checkbox';
+    cb.title = 'Select to delete';
+    cb.addEventListener('change', function() { onCheckboxChange(rec.id, cb.checked); });
 
-        li.innerHTML =
-            '<div class="rec-item-top">' +
-                '<input type="checkbox" class="rec-checkbox" ' + checkedAttr + ' onchange="toggleRecSelect(\'' + rec.id + '\', this.checked)" title="Select to delete">' +
-                '<div class="rec-info">' +
-                    '<div class="rec-name">' + rec.name + '</div>' +
-                    '<div class="rec-meta">' + formatTimestamp(rec.timestamp) + ' &nbsp;&middot;&nbsp; ' + formatDuration(rec.duration) + '</div>' +
-                '</div>' +
-                '<button class="rec-play-btn ' + playingClass + '" onclick="togglePlayRec(\'' + rec.id + '\')" title="' + (currentPlayingId === rec.id ? 'Pause' : 'Play') + '">' +
-                    playIcon +
-                '</button>' +
-            '</div>' +
-            '<div class="rec-audio-wrap">' +
-                '<audio id="audio_' + rec.id + '" src="' + rec.url + '" controls preload="metadata" ' +
-                    'onended="onRecEnded(\'' + rec.id + '\')" ' +
-                    'onplay="onRecPlay(\'' + rec.id + '\')" ' +
-                    'onpause="onRecPause(\'' + rec.id + '\')"></audio>' +
-            '</div>';
-        list.appendChild(li);
+    var info = document.createElement('div');
+    info.className = 'rec-info';
+    info.innerHTML =
+        '<div class="rec-name">' + rec.name + '</div>' +
+        '<div class="rec-meta">' + formatTimestamp(rec.timestamp) +
+        ' &nbsp;&middot;&nbsp; ' + formatDuration(rec.duration) + '</div>';
+
+    var playBtn = document.createElement('button');
+    playBtn.className = 'rec-play-btn';
+    playBtn.id = 'playbtn_' + rec.id;
+    playBtn.title = 'Play';
+    playBtn.innerHTML = '&#9654;';
+    playBtn.addEventListener('click', function() { togglePlayRec(rec.id); });
+
+    top.appendChild(cb);
+    top.appendChild(info);
+    top.appendChild(playBtn);
+
+    // Audio element — created ONCE, never recreated
+    var audioWrap = document.createElement('div');
+    audioWrap.className = 'rec-audio-wrap';
+
+    var audio = document.createElement('audio');
+    audio.id = 'audio_' + rec.id;
+    audio.controls = true;
+    audio.preload = 'metadata';
+
+    // Set source via Blob directly — most reliable cross-browser approach
+    audio.src = rec.url;
+    audio.load();
+
+    audio.addEventListener('play',  function() { markPlaying(rec.id, true);  });
+    audio.addEventListener('pause', function() { markPlaying(rec.id, false); });
+    audio.addEventListener('ended', function() { markPlaying(rec.id, false); });
+    audio.addEventListener('error', function(e) {
+        console.error('Audio error', audio.error);
+        showToast('Playback error (code ' + (audio.error ? audio.error.code : '?') + '). Try a different browser.');
     });
+
+    audioWrap.appendChild(audio);
+    li.appendChild(top);
+    li.appendChild(audioWrap);
+
+    // Prepend so newest is at the top
+    list.insertBefore(li, list.firstChild);
 }
 
 function togglePlayRec(id) {
-    const audio = document.getElementById('audio_' + id);
+    var audio = document.getElementById('audio_' + id);
     if (!audio) return;
+
+    // Stop all others
+    recordings.forEach(function(r) {
+        if (r.id !== id) {
+            var a = document.getElementById('audio_' + r.id);
+            if (a && !a.paused) { a.pause(); a.currentTime = 0; }
+        }
+    });
+
     if (audio.paused) {
-        // Pause any other playing audio first
-        recordings.forEach(r => {
-            if (r.id !== id) {
-                const a = document.getElementById('audio_' + r.id);
-                if (a && !a.paused) { a.pause(); a.currentTime = 0; }
-            }
-        });
-        audio.play().catch(err => showToast('Playback error — try the player controls directly.'));
+        var p = audio.play();
+        if (p && typeof p.catch === 'function') {
+            p.catch(function(err) {
+                console.error('play() rejected:', err);
+                showToast('Could not auto-play. Use the ▶ button in the player bar below.');
+            });
+        }
     } else {
         audio.pause();
         audio.currentTime = 0;
     }
 }
 
-function onRecPlay(id) {
-    currentPlayingId = id;
-    renderRecordingsList();
+function markPlaying(id, isPlaying) {
+    currentPlayingId = isPlaying ? id : null;
+    var btn = document.getElementById('playbtn_' + id);
+    var li  = document.getElementById('recli_' + id);
+    if (btn) {
+        btn.innerHTML   = isPlaying ? '&#9646;&#9646;' : '&#9654;';
+        btn.title       = isPlaying ? 'Pause' : 'Play';
+        btn.classList.toggle('playing', isPlaying);
+    }
+    if (li) li.classList.toggle('playing', isPlaying);
 }
 
-function onRecPause(id) {
-    if (currentPlayingId === id) currentPlayingId = null;
-    renderRecordingsList();
-}
-
-function onRecEnded(id) {
-    if (currentPlayingId === id) currentPlayingId = null;
-    renderRecordingsList();
-}
-
-function toggleRecSelect(id, checked) {
-    const rec = recordings.find(r => r.id === id);
+function onCheckboxChange(id, checked) {
+    var rec = recordings.find(function(r) { return r.id === id; });
     if (rec) rec.selected = checked;
-    renderRecordingsList();
+    var li = document.getElementById('recli_' + id);
+    if (li) li.classList.toggle('selected', checked);
+    updateBulkBar();
+}
+
+function updateBulkBar() {
+    var selected = recordings.filter(function(r) { return r.selected; });
+    var bar = document.getElementById('recBulkBar');
+    if (selected.length > 0) {
+        bar.style.display = 'flex';
+        document.getElementById('recSelCount').textContent = selected.length + ' selected';
+    } else {
+        bar.style.display = 'none';
+    }
 }
 
 function deleteSelectedRecordings() {
-    const toDelete = recordings.filter(r => r.selected);
+    var toDelete = recordings.filter(function(r) { return r.selected; });
     if (toDelete.length === 0) return;
     if (!confirm('Delete ' + toDelete.length + ' recording(s)? This cannot be undone.')) return;
-    toDelete.forEach(r => {
-        const a = document.getElementById('audio_' + r.id);
-        if (a && !a.paused) a.pause();
+    toDelete.forEach(function(r) {
+        var a = document.getElementById('audio_' + r.id);
+        if (a) { a.pause(); a.src = ''; }
         URL.revokeObjectURL(r.url);
+        var li = document.getElementById('recli_' + r.id);
+        if (li) li.remove();
         if (currentPlayingId === r.id) currentPlayingId = null;
     });
-    recordings = recordings.filter(r => !r.selected);
-    renderRecordingsList();
-    showToast('🗑 ' + toDelete.length + ' recording(s) deleted.');
+    recordings = recordings.filter(function(r) { return !r.selected; });
+    if (recordings.length === 0) {
+        document.getElementById('recEmptyMsg').style.display = 'block';
+    }
+    updateBulkBar();
+    showToast(toDelete.length + ' recording(s) deleted.');
 }
 
+// renderRecordingsList kept as no-op — list is built incrementally now
+function renderRecordingsList() {}
+
 function drawFlatWave() {
-    const c = document.getElementById('waveCanvas');
+    var c = document.getElementById('waveCanvas');
     if (!c) return;
-    c.width = c.offsetWidth || 500; c.height = c.offsetHeight || 56;
-    const ctx = c.getContext('2d');
-    ctx.clearRect(0,0,c.width,c.height);
-    ctx.strokeStyle = '#667eea'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0, c.height/2); ctx.lineTo(c.width, c.height/2); ctx.stroke();
+    c.width  = c.offsetWidth  || 500;
+    c.height = c.offsetHeight || 56;
+    var ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#667eea';
+    ctx.lineWidth   = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, c.height / 2);
+    ctx.lineTo(c.width, c.height / 2);
+    ctx.stroke();
 }
 
 function drawLiveWave() {
     if (!recActive) { drawFlatWave(); return; }
-    const c = document.getElementById('waveCanvas');
-    if (!c || !analyserNode) return;
-    c.width = c.offsetWidth || 500; c.height = c.offsetHeight || 56;
-    const ctx = c.getContext('2d');
-    const buf = new Uint8Array(analyserNode.frequencyBinCount);
+    var c = document.getElementById('waveCanvas');
+    if (!c || !analyserNode) { animFrameId = requestAnimationFrame(drawLiveWave); return; }
+    c.width  = c.offsetWidth  || 500;
+    c.height = c.offsetHeight || 56;
+    var ctx = c.getContext('2d');
+    var buf = new Uint8Array(analyserNode.frequencyBinCount);
     analyserNode.getByteTimeDomainData(buf);
-    ctx.clearRect(0,0,c.width,c.height);
-    ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 2.5; ctx.beginPath();
-    const sl = c.width / buf.length;
-    buf.forEach((v, i) => {
-        const x = i * sl, y = (v / 128.0) * (c.height / 2);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#a78bfa';
+    ctx.lineWidth   = 2.5;
+    ctx.beginPath();
+    var sl = c.width / buf.length;
+    for (var i = 0; i < buf.length; i++) {
+        var x = i * sl;
+        var y = (buf[i] / 128.0) * (c.height / 2);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
     ctx.stroke();
     animFrameId = requestAnimationFrame(drawLiveWave);
 }
