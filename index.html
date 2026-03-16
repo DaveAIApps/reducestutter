@@ -268,7 +268,8 @@
         }
         canvas#waveCanvas { width: 100%; height: 100%; display: block; }
         .rec-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-        .rec-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85em; color: #dc3545; font-weight: 600; }
+        .rec-indicator { display: none; align-items: center; gap: 6px; font-size: 0.85em; color: #dc3545; font-weight: 600; }
+        .rec-indicator.visible { display: inline-flex; }
         .rec-dot { width: 9px; height: 9px; border-radius: 50%; background: #dc3545; animation: blink 1s infinite; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
@@ -627,7 +628,7 @@
                 </div>
                 <div class="rec-row">
                     <button class="btn btn-small btn-danger" id="recBtn" onclick="toggleRecording()" style="width:auto;">⏺ Record</button>
-                    <div class="rec-indicator hidden" id="recIndicator">
+                    <div class="rec-indicator" id="recIndicator">
                         <div class="rec-dot"></div> Recording…
                     </div>
                 </div>
@@ -1481,7 +1482,7 @@ async function toggleRecording() {
         mediaRecorder.start(250);
         recActive = true;
         document.getElementById('recBtn').textContent = '⏹ Stop';
-        document.getElementById('recIndicator').classList.remove('hidden');
+        document.getElementById('recIndicator').classList.add('visible');
         drawLiveWave();
     } catch(e) {
         showToast('Microphone access denied. Please allow mic in browser settings.');
@@ -1492,7 +1493,7 @@ function stopRecording() {
     if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
     recActive = false;
     document.getElementById('recBtn').textContent = '⏺ Record';
-    document.getElementById('recIndicator').classList.add('hidden');
+    document.getElementById('recIndicator').classList.remove('visible');
 }
 
 function renderRecordingsList() {
