@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1497,9 +1496,9 @@ function stopRecording() {
 }
 
 function renderRecordingsList() {
-    const list = document.getElementById('recList');
-    const empty = document.getElementById('recEmptyMsg');
-    const bulkBar = document.getElementById('recBulkBar');
+    var list = document.getElementById('recList');
+    var empty = document.getElementById('recEmptyMsg');
+    var bulkBar = document.getElementById('recBulkBar');
     list.innerHTML = '';
 
     if (recordings.length === 0) {
@@ -1509,8 +1508,7 @@ function renderRecordingsList() {
     }
     empty.style.display = 'none';
 
-    // Check if any are selected
-    const selected = recordings.filter(r => r.selected);
+    var selected = recordings.filter(function(r) { return r.selected; });
     if (selected.length > 0) {
         bulkBar.style.display = 'flex';
         document.getElementById('recSelCount').textContent = selected.length + ' selected';
@@ -1518,29 +1516,35 @@ function renderRecordingsList() {
         bulkBar.style.display = 'none';
     }
 
-    // Render newest first
-    [...recordings].reverse().forEach(rec => {
-        const li = document.createElement('li');
-        li.className = 'rec-item' + (rec.selected ? ' selected' : '') + (currentPlayingId === rec.id ? ' playing' : '');
-        li.innerHTML = \`
-            <div class="rec-item-top">
-                <input type="checkbox" class="rec-checkbox" \${rec.selected ? 'checked' : ''}
-                    onchange="toggleRecSelect('\${rec.id}', this.checked)" title="Select to delete">
-                <div class="rec-info">
-                    <div class="rec-name">\${rec.name}</div>
-                    <div class="rec-meta">\${formatTimestamp(rec.timestamp)} &nbsp;·&nbsp; \${formatDuration(rec.duration)}</div>
-                </div>
-                <button class="rec-play-btn \${currentPlayingId === rec.id ? 'playing' : ''}"
-                    onclick="togglePlayRec('\${rec.id}')" title="\${currentPlayingId === rec.id ? 'Pause' : 'Play'}">
-                    \${currentPlayingId === rec.id ? '⏸' : '▶'}
-                </button>
-            </div>
-            <div class="rec-audio-wrap">
-                <audio id="audio_\${rec.id}" src="\${rec.url}" controls preload="metadata"
-                    onended="onRecEnded('\${rec.id}')"
-                    onplay="onRecPlay('\${rec.id}')"
-                    onpause="onRecPause('\${rec.id}')"></audio>
-            </div>\`;
+    var reversed = recordings.slice().reverse();
+    reversed.forEach(function(rec) {
+        var li = document.createElement('li');
+        var cls = 'rec-item';
+        if (rec.selected) cls += ' selected';
+        if (currentPlayingId === rec.id) cls += ' playing';
+        li.className = cls;
+
+        var playingClass = currentPlayingId === rec.id ? 'playing' : '';
+        var playIcon = currentPlayingId === rec.id ? '&#9646;&#9646;' : '&#9654;';
+        var checkedAttr = rec.selected ? 'checked' : '';
+
+        li.innerHTML =
+            '<div class="rec-item-top">' +
+                '<input type="checkbox" class="rec-checkbox" ' + checkedAttr + ' onchange="toggleRecSelect(\'' + rec.id + '\', this.checked)" title="Select to delete">' +
+                '<div class="rec-info">' +
+                    '<div class="rec-name">' + rec.name + '</div>' +
+                    '<div class="rec-meta">' + formatTimestamp(rec.timestamp) + ' &nbsp;&middot;&nbsp; ' + formatDuration(rec.duration) + '</div>' +
+                '</div>' +
+                '<button class="rec-play-btn ' + playingClass + '" onclick="togglePlayRec(\'' + rec.id + '\')" title="' + (currentPlayingId === rec.id ? 'Pause' : 'Play') + '">' +
+                    playIcon +
+                '</button>' +
+            '</div>' +
+            '<div class="rec-audio-wrap">' +
+                '<audio id="audio_' + rec.id + '" src="' + rec.url + '" controls preload="metadata" ' +
+                    'onended="onRecEnded(\'' + rec.id + '\')" ' +
+                    'onplay="onRecPlay(\'' + rec.id + '\')" ' +
+                    'onpause="onRecPause(\'' + rec.id + '\')"></audio>' +
+            '</div>';
         list.appendChild(li);
     });
 }
